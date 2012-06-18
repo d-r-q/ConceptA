@@ -1,0 +1,5 @@
+v. 0.1
+* initial release
+* simple orbital random movement
+* head on gun
+* wins against sample bots, exclude Walls (because head on gun)
