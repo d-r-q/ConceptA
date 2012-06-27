@@ -19,6 +19,7 @@ public class CaRobot extends CaRobotState {
     private final double acceleration;
     private final double gunHeat;
     private final double absoluteHeading;
+    private final double firedBulletSpeed;
 
     public CaRobot(CaRobotState currentState) {
         super(currentState.name, currentState.position, currentState.velocity, currentState.heading, currentState.energy, currentState.time);
@@ -26,6 +27,7 @@ public class CaRobot extends CaRobotState {
         acceleration = 0;
         absoluteHeading = currentState.heading;
         gunHeat = BattleConstants.initialGunHeat;
+        firedBulletSpeed = 0;
     }
 
     public CaRobot(CaRobot prevState, CaRobotState currentState) {
@@ -35,7 +37,16 @@ public class CaRobot extends CaRobotState {
         absoluteHeading = currentState.velocity >= 0
                 ? currentState.heading
                 : Utils.normalAbsoluteAngle(currentState.heading + Math.PI);
-        gunHeat = max(0, prevState.gunHeat - BattleConstants.gunCoolingRate);
+
+        // todo: add hits accounting
+        if (prevState.gunHeat - BattleConstants.gunCoolingRate <= 0 && currentState.energy < prevState.energy) {
+            final double bulletPower = prevState.energy - currentState.energy;
+            firedBulletSpeed = Rules.getBulletSpeed(bulletPower);
+            gunHeat = Rules.getGunHeat(bulletPower);
+        } else {
+            firedBulletSpeed = 0;
+            gunHeat = max(0, prevState.gunHeat - BattleConstants.gunCoolingRate);
+        }
     }
 
     public double getAcceleration() {
@@ -44,6 +55,10 @@ public class CaRobot extends CaRobotState {
 
     public double getGunHeat() {
         return gunHeat;
+    }
+
+    public double getFiredBulletSpeed() {
+        return firedBulletSpeed;
     }
 
     private static double calculateAcceleration(CaRobotState prevState, CaRobotState curState) {

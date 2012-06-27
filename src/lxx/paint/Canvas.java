@@ -11,7 +11,8 @@ import java.util.LinkedList;
  */
 public enum Canvas {
 
-    RANDOM_MOVEMENT(true);
+    RANDOM_MOVEMENT(true),
+    MISK(true);
 
     private LinkedList<DrawCommand> drawables = new LinkedList<DrawCommand>();
 

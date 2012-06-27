@@ -2,7 +2,6 @@ package lxx.strategy;
 
 import lxx.ConceptA;
 import lxx.model.BattleModel;
-import robocode.AdvancedRobot;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -20,7 +19,7 @@ public class StrategySelector {
     public StrategySelector(BattleModel model, ConceptA me) {
         this.model = model;
 
-        strategies.add(new FindEnemyStrategy());
+        strategies.add(new FindEnemyStrategy(me));
         strategies.add(new DuelStrategy(me));
     }
 

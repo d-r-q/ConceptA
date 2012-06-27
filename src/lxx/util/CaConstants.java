@@ -11,6 +11,7 @@ public class CaConstants {
     public static final double RADIANS_0 = 0;
     public static final double RADIANS_4 = toRadians(4);
     public static final double RADIANS_30 = toRadians(30);
+    public static final double RADIANS_45 = toRadians(45);
     public static final double RADIANS_80 = toRadians(80);
     public static final double RADIANS_90 = toRadians(90);
     public static final double RADIANS_100 = toRadians(100);

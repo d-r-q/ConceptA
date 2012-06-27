@@ -61,7 +61,12 @@ public class CaRobotState {
         return position.angleTo(pnt);
     }
 
+    public CaPoint project(double alpha, double distance) {
+        return position.project(alpha, distance);
+    }
+
     public double getSpeed() {
         return speed;
     }
+
 }

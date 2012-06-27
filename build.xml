@@ -3,7 +3,7 @@
 <project name="ConceptA" basedir="."
          default="release">
     <property file="excluded\build.properties"/>
-    <property name="robot.version" value="0.1"/>
+    <property name="robot.version" value="0.2"/>
     <property name="robot.name" value="ConceptA"/>
 
     <path id="src.files">
@@ -64,6 +64,9 @@
         <copy todir="${robocode.dir}\robots\">
             <fileset file="${builds.dir}\lxx.${robot.name}_${robot.version}.jar"/>
         </copy>
+
+        <echo>${robocode.dir}\robots\</echo>
+        <echo>${builds.dir}\lxx.${robot.name}_${robot.version}.jar</echo>
 
         <delete includeEmptyDirs="true">
             <fileset dir="${bin.dir}" includes="**/*"/>

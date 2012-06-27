@@ -1,14 +1,18 @@
 package lxx;
 
+import lxx.events.FireEvent;
 import lxx.model.BattleField;
 import lxx.model.BattleModel;
+import lxx.model.CaRobot;
 import lxx.model.TurnEvents;
 import lxx.paint.CaGraphics;
 import lxx.paint.Canvas;
 import lxx.strategy.StrategySelector;
 import lxx.strategy.TurnDecision;
+import lxx.util.CaPoint;
 import lxx.util.Log;
 import robocode.AdvancedRobot;
+import robocode.Bullet;
 import robocode.DeathEvent;
 import robocode.StatusEvent;
 
@@ -33,12 +37,14 @@ public class ConceptA extends AdvancedRobot {
     private final List<TickListener> tickListeners = new LinkedList<TickListener>();
 
     private boolean isAlive = true;
+    private Bullet firedBullet;
 
     @Override
     public void run() {
         BattleConstants.myName = getName();
         BattleConstants.initialGunHeat = getGunHeat();
         BattleConstants.gunCoolingRate = getGunCoolingRate();
+        BattleConstants.setRobotBounds(getWidth(), getHeight());
 
         int robotWidth = (int) getWidth();
         int robotHeight = (int) getHeight();
@@ -70,6 +76,7 @@ public class ConceptA extends AdvancedRobot {
 
             setTurnRadarRightRadians(turnDecision.radarTurnRate);
 
+            paint(getGraphics());
             Config.isPaintEnabled = false;
             execute();
         }
@@ -84,12 +91,24 @@ public class ConceptA extends AdvancedRobot {
     private void handleGun(TurnDecision tr) {
         setTurnGunRightRadians(tr.gunTurnRate);
         if (tr.firePower > 0) {
-            setFire(tr.firePower);
+            firedBullet = setFireBullet(tr.firePower);
+            final CaRobot me = model.me;
+            final CaRobot duelOpponent = model.duelOpponent();
+            final double dist = me.getPosition().distance(duelOpponent.getPosition());
+        } else {
+            firedBullet = null;
         }
     }
 
+    private CaPoint myPos(CaRobot me) {
+        return me.getPosition();
+    }
+
     private TurnEvents getTurnEvents(StatusEvent e) {
-        final TurnEvents turnEvents = new TurnEvents(getScannedRobotEvents(), e);
+        final FireEvent fireEvent = firedBullet == null
+                ? null
+                : new FireEvent(firedBullet);
+        final TurnEvents turnEvents = new TurnEvents(getScannedRobotEvents(), e, fireEvent);
         getScannedRobotEvents().clear();
         getStatusEvents().clear();
 
@@ -109,6 +128,9 @@ public class ConceptA extends AdvancedRobot {
     @Override
     public void onPaint(Graphics2D g) {
         Config.isPaintEnabled = true;
+    }
+
+    private void paint(Graphics2D g) {
         final CaGraphics cg = new CaGraphics(g);
 
         for (Canvas c : Canvas.values()) {
@@ -121,10 +143,18 @@ public class ConceptA extends AdvancedRobot {
         switch (e.getKeyCode()) {
             case KeyEvent.VK_F1:
                 Canvas.RANDOM_MOVEMENT.switchEnabled();
+                break;
             case KeyEvent.VK_F11:
                 Log.decreaseLogLevel();
+                break;
             case KeyEvent.VK_F12:
                 Log.increaseLogLevel();
+                break;
+            case KeyEvent.VK_P:
+                for (Canvas c : Canvas.values()) {
+                    c.switchEnabled();
+                }
+                break;
         }
     }
 

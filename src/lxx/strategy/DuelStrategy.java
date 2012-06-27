@@ -31,6 +31,10 @@ public class DuelStrategy implements Strategy {
 
     @Override
     public TurnDecision getTurnDecision(BattleModel model) {
+        me.setAdjustGunForRobotTurn(true);
+        me.setAdjustRadarForGunTurn(true);
+        me.setAdjustRadarForRobotTurn(true);
+
         final CaRobot opponent = model.duelOpponent();
         final double angleToEnemy = model.me.angleTo(opponent);
         final CaPoint enemyNextPos = opponent.getPosition().project(opponent.getAbsoluteHeading(), Rules.MAX_VELOCITY);
