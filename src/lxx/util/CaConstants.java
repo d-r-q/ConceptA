@@ -9,6 +9,7 @@ import static java.lang.Math.toRadians;
 public class CaConstants {
 
     public static final double RADIANS_0 = 0;
+    public static final double RADIANS_5 = toRadians(5);
     public static final double RADIANS_4 = toRadians(4);
     public static final double RADIANS_30 = toRadians(30);
     public static final double RADIANS_45 = toRadians(45);

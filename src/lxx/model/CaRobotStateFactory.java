@@ -13,9 +13,10 @@ import robocode.StatusEvent;
 public class CaRobotStateFactory {
 
     public static CaRobotState createState(StatusEvent e) {
+
         final RobotStatus status = e.getStatus();
-        return new CaRobotState(BattleConstants.myName, new CaPoint(status.getX(), status.getY()),
-                status.getVelocity(), status.getHeadingRadians(), status.getEnergy(), e.getTime());
+        return new CaRobotState(BattleConstants.myName, new CaPoint(status.getX(), status.getY()), status.getVelocity(),
+                status.getHeadingRadians(), status.getEnergy(), e.getTime(), status.getRadarHeadingRadians(), status.getGunHeadingRadians());
     }
 
     public static CaRobotState createState(StatusEvent e, ScannedRobotEvent se) {
@@ -24,8 +25,7 @@ public class CaRobotStateFactory {
         final CaPoint enemyPos = new CaPoint(status.getX(), status.getY()).
                 project(status.getHeadingRadians() + se.getBearingRadians(), se.getDistance());
 
-        return new CaRobotState(se.getName(), enemyPos,
-                se.getVelocity(), se.getHeadingRadians(), se.getEnergy(), se.getTime());
+        return new CaRobotState(se.getName(), enemyPos, se.getVelocity(), se.getHeadingRadians(), se.getEnergy(), se.getTime());
     }
 
 }

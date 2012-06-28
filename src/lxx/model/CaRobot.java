@@ -22,7 +22,8 @@ public class CaRobot extends CaRobotState {
     private final double firedBulletSpeed;
 
     public CaRobot(CaRobotState currentState) {
-        super(currentState.name, currentState.position, currentState.velocity, currentState.heading, currentState.energy, currentState.time);
+        super(currentState.name, currentState.position, currentState.velocity, currentState.heading, currentState.energy, currentState.time,
+                currentState.radarHeading, currentState.gunHeading);
 
         acceleration = 0;
         absoluteHeading = currentState.heading;
@@ -31,7 +32,8 @@ public class CaRobot extends CaRobotState {
     }
 
     public CaRobot(CaRobot prevState, CaRobotState currentState) {
-        super(currentState.name, currentState.position, currentState.velocity, currentState.heading, currentState.energy, currentState.time);
+        super(currentState.name, currentState.position, currentState.velocity, currentState.heading, currentState.energy, currentState.time,
+                currentState.radarHeading, currentState.gunHeading);
 
         acceleration = calculateAcceleration(prevState, currentState);
         absoluteHeading = currentState.velocity >= 0
