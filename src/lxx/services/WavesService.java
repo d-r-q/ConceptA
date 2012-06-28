@@ -23,8 +23,8 @@ public class WavesService implements BattleModelListener {
     public static final Color WAVE_COLOR = new Color(0, 200, 255, 135);
     private LinkedList<W> waves = new LinkedList<W>();
 
-    public void launchWave(CaPoint startPos, double speed, WaveCallback waveCallback, CaRobot... targets) {
-        final Wave w = new Wave(startPos, speed, targets);
+    public void launchWave(BattleModel fireTimeState, CaPoint startPos, double speed, WaveCallback waveCallback, CaRobot... targets) {
+        final Wave w = new Wave(fireTimeState, startPos, speed, targets);
         waves.add(new W(w, waveCallback));
     }
 

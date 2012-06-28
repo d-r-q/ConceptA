@@ -1,6 +1,7 @@
 package lxx.strategy;
 
 import lxx.ConceptA;
+import lxx.gun.GuessFactorGun;
 import lxx.model.BattleModel;
 import lxx.model.CaRobot;
 import lxx.movement.MovementDecision;
@@ -17,9 +18,11 @@ public class DuelStrategy implements Strategy {
 
     private final ConceptA me;
     private final RandomMovement randomMovement;
+    private final GuessFactorGun gun;
 
-    public DuelStrategy(ConceptA me) {
+    public DuelStrategy(ConceptA me, GuessFactorGun gun) {
         this.me = me;
+        this.gun = gun;
         randomMovement = new RandomMovement();
         me.addTickListener(randomMovement);
     }
@@ -40,9 +43,12 @@ public class DuelStrategy implements Strategy {
 
         final MovementDecision md = randomMovement.getMovementDecision(model);
 
+        final double bo = gun.aim(model, Rules.getBulletSpeed(3));
+        final double gunHeading = angleToEnemy + bo;
+
         return new TurnDecision(
                 md.desiredVelocity, md.turnRate,
-                Utils.normalRelativeAngle(angleToEnemy - me.getGunHeadingRadians()), 3,
+                Utils.normalRelativeAngle(gunHeading - me.getGunHeadingRadians()), 3,
                 DuelRadar.getRadarTurnAngleRadians(model.me, model.duelOpponent));
     }
 

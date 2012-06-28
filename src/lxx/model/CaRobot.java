@@ -1,6 +1,7 @@
 package lxx.model;
 
 import lxx.BattleConstants;
+import lxx.util.CaConstants;
 import lxx.util.CaUtils;
 import lxx.util.Log;
 import robocode.Rules;
@@ -18,7 +19,7 @@ public class CaRobot extends CaRobotState {
 
     private final double acceleration;
     private final double gunHeat;
-    private final double absoluteHeading;
+    private final double movementDirection;
     private final double firedBulletSpeed;
 
     public CaRobot(CaRobotState currentState) {
@@ -26,7 +27,7 @@ public class CaRobot extends CaRobotState {
                 currentState.radarHeading, currentState.gunHeading);
 
         acceleration = 0;
-        absoluteHeading = currentState.heading;
+        movementDirection = currentState.heading;
         gunHeat = BattleConstants.initialGunHeat;
         firedBulletSpeed = 0;
     }
@@ -36,9 +37,13 @@ public class CaRobot extends CaRobotState {
                 currentState.radarHeading, currentState.gunHeading);
 
         acceleration = calculateAcceleration(prevState, currentState);
-        absoluteHeading = currentState.velocity >= 0
-                ? currentState.heading
-                : Utils.normalAbsoluteAngle(currentState.heading + Math.PI);
+        if (currentState.speed == 0) {
+            movementDirection = Double.NaN;
+        } else if (currentState.velocity > 0) {
+            movementDirection = currentState.heading;
+        } else {
+            movementDirection = Utils.normalAbsoluteAngle(currentState.heading + CaConstants.RADIANS_180);
+        }
 
         // todo: add hits accounting
         if (prevState.gunHeat - BattleConstants.gunCoolingRate <= 0 && currentState.energy < prevState.energy) {
@@ -86,7 +91,7 @@ public class CaRobot extends CaRobotState {
         return acceleration;
     }
 
-    public double getAbsoluteHeading() {
-        return absoluteHeading;
+    public double getMovementDirection() {
+        return movementDirection;
     }
 }

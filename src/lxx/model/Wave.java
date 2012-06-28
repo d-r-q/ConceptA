@@ -6,6 +6,7 @@ import lxx.events.WavePassedEvent;
 import lxx.util.CaPoint;
 import lxx.util.CaUtils;
 import lxx.util.IntervalDouble;
+import robocode.util.Utils;
 
 import java.util.*;
 
@@ -23,23 +24,21 @@ public class Wave {
     private final Map<String, CaRobot> remainingTargets = new HashMap<String, CaRobot>();
     private final Map<String, IntervalDouble> hitIntervals = new HashMap<String, IntervalDouble>();
 
+    public final BattleModel fireTimeState;
     public final double speed;
     public final CaPoint startPos;
     public final long launchTime;
 
-    public Wave(CaPoint startPos, double speed, long launchTime, CaRobot ... targets) {
+    public Wave(BattleModel fireTimeState, CaPoint startPos, double speed, CaRobot... targets) {
+        this.fireTimeState = fireTimeState;
         this.speed = speed;
         this.startPos = startPos;
-        this.launchTime = launchTime;
+        this.launchTime = fireTimeState.time;
 
         for (CaRobot robot : targets) {
             hitIntervals.put(robot.getName(), new IntervalDouble(NO_HIT_INTERVAL, NO_HIT_INTERVAL));
             remainingTargets.put(robot.getName(), robot);
         }
-    }
-
-    public Wave(CaPoint startPos, double speed, CaRobot ... targets) {
-        this(startPos, speed, ConceptA.currentTime - 1, targets);
     }
 
     public List<WavePassedEvent> check(BattleModel model) {
@@ -56,16 +55,19 @@ public class Wave {
                 final IntervalDouble hitInterval = hitIntervals.get(robot.getName());
 
                 final double noBearingOffset = startPos.angleTo(remainingTargets.get(remainingTargetName).getPosition());
-                final double currentBearingOffset = alpha - noBearingOffset;
+                final double currentBearingOffset = Utils.normalRelativeAngle(alpha - noBearingOffset);
                 if (hitInterval.center() == NO_HIT_INTERVAL) {
-                    hitInterval.a = alpha;
-                    hitInterval.b = alpha;
+                    hitInterval.a = currentBearingOffset;
+                    hitInterval.b = currentBearingOffset;
                 }
-                final double minBo = min(currentBearingOffset - halfRobotWidthRadians, currentBearingOffset + halfRobotWidthRadians);
-                final double maxBo = max(currentBearingOffset - halfRobotWidthRadians, currentBearingOffset + halfRobotWidthRadians);
+                final double ccwEdge = currentBearingOffset - halfRobotWidthRadians;
+                final double cwEdge = currentBearingOffset + halfRobotWidthRadians;
+                final double minBo = min(ccwEdge, cwEdge);
+                final double maxBo = max(ccwEdge, cwEdge);
 
                 hitInterval.extend(minBo);
                 hitInterval.extend(maxBo);
+
             } else if (hitIntervals.get(robot.getName()).center() != NO_HIT_INTERVAL) {
                 events.add(new WavePassedEvent(this, robot, hitIntervals.remove(robot.getName())));
                 remainingTargets.remove(robot.getName());

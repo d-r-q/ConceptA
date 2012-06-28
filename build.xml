@@ -3,7 +3,7 @@
 <project name="ConceptA" basedir="."
          default="release">
     <property file="excluded\build.properties"/>
-    <property name="robot.version" value="0.4.1"/>
+    <property name="robot.version" value="0.4"/>
     <property name="robot.name" value="ConceptA"/>
 
     <path id="src.files">
