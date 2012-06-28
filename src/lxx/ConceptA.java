@@ -1,15 +1,12 @@
 package lxx;
 
 import lxx.events.FireEvent;
-import lxx.model.BattleField;
-import lxx.model.BattleModel;
-import lxx.model.CaRobot;
-import lxx.model.TurnEvents;
+import lxx.model.*;
 import lxx.paint.CaGraphics;
 import lxx.paint.Canvas;
+import lxx.services.Context;
 import lxx.strategy.StrategySelector;
 import lxx.strategy.TurnDecision;
-import lxx.util.CaPoint;
 import lxx.util.Log;
 import robocode.AdvancedRobot;
 import robocode.Bullet;
@@ -33,14 +30,17 @@ public class ConceptA extends AdvancedRobot {
     public static long currentTime;
     public static long currentRound;
 
-    private final BattleModel model = new BattleModel();
     private final List<TickListener> tickListeners = new LinkedList<TickListener>();
+    private final List<BattleModelListener> bmListeners = new LinkedList<BattleModelListener>();
+
+    private BattleModel model = new BattleModel();
 
     private boolean isAlive = true;
     private Bullet firedBullet;
 
     @Override
     public void run() {
+        final Context context = new Context(this);
         BattleConstants.myName = getName();
         BattleConstants.initialGunHeat = getGunHeat();
         BattleConstants.gunCoolingRate = getGunCoolingRate();
@@ -57,7 +57,7 @@ public class ConceptA extends AdvancedRobot {
         setGunColor(new Color(245, 250, 255));
         setRadarColor(Color.WHITE);
 
-        final StrategySelector strategySelector = new StrategySelector(model, this);
+        final StrategySelector strategySelector = new StrategySelector(this, context);
 
         // start search for enemy until state is unknown
         setTurnRightRadians(Double.POSITIVE_INFINITY);
@@ -69,7 +69,7 @@ public class ConceptA extends AdvancedRobot {
             for (TickListener tl : tickListeners) {
                 tl.tick();
             }
-            final TurnDecision turnDecision = strategySelector.selectStrategy().getTurnDecision(model);
+            final TurnDecision turnDecision = strategySelector.selectStrategy(model).getTurnDecision(model);
             move(turnDecision);
             handleGun(turnDecision);
             setTurnRadarRight(turnDecision.radarTurnRate);
@@ -77,7 +77,6 @@ public class ConceptA extends AdvancedRobot {
             setTurnRadarRightRadians(turnDecision.radarTurnRate);
 
             paint(getGraphics());
-            Config.isPaintEnabled = false;
             execute();
         }
     }
@@ -92,16 +91,9 @@ public class ConceptA extends AdvancedRobot {
         setTurnGunRightRadians(tr.gunTurnRate);
         if (tr.firePower > 0) {
             firedBullet = setFireBullet(tr.firePower);
-            final CaRobot me = model.me;
-            final CaRobot duelOpponent = model.duelOpponent();
-            final double dist = me.getPosition().distance(duelOpponent.getPosition());
         } else {
             firedBullet = null;
         }
-    }
-
-    private CaPoint myPos(CaRobot me) {
-        return me.getPosition();
     }
 
     private TurnEvents getTurnEvents(StatusEvent e) {
@@ -122,7 +114,14 @@ public class ConceptA extends AdvancedRobot {
     @Override
     public void onStatus(StatusEvent e) {
         currentTime = getTime();
-        model.update(getTurnEvents(e));
+        final BattleModel newState = model.update(getTurnEvents(e));
+
+        for (BattleModelListener listener : bmListeners) {
+            listener.battleModelUpdated(newState);
+        }
+
+        model = newState;
+        Config.isPaintEnabled = false;
     }
 
     @Override
@@ -144,6 +143,9 @@ public class ConceptA extends AdvancedRobot {
             case KeyEvent.VK_F1:
                 Canvas.RANDOM_MOVEMENT.switchEnabled();
                 break;
+            case KeyEvent.VK_F2:
+                Canvas.WAVES.switchEnabled();
+                break;
             case KeyEvent.VK_F11:
                 Log.decreaseLogLevel();
                 break;
@@ -161,5 +163,9 @@ public class ConceptA extends AdvancedRobot {
     @Override
     public void onDeath(DeathEvent event) {
         isAlive = false;
+    }
+
+    public void addBattleModelListener(BattleModelListener listener) {
+        bmListeners.add(listener);
     }
 }

@@ -1,5 +1,6 @@
 package lxx.util;
 
+import lxx.model.CaRobot;
 import wiki.FastMath;
 
 import java.awt.geom.Point2D;

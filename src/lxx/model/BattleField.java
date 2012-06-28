@@ -6,6 +6,7 @@ import lxx.util.IntervalDouble;
 import robocode.util.Utils;
 import wiki.FastMath;
 
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import static java.lang.Math.max;
@@ -46,6 +47,7 @@ public class BattleField {
 
     public static int width;
     public static int height;
+    public static double diagonal;
 
     public static void init(int x, int y, int width, int height) {
         availableBottomY = y;
@@ -89,6 +91,8 @@ public class BattleField {
 
         noSmoothX = new IntervalDouble(WALL_STICK, width - WALL_STICK);
         noSmoothY = new IntervalDouble(WALL_STICK, height - WALL_STICK);
+
+        diagonal = Point2D.distance(0, 0, width, height);
     }
 
     // this method is called very often, so keep it optimal
@@ -164,6 +168,10 @@ public class BattleField {
 
     public static boolean contains(CaPoint point) {
         return availableBattleFieldRectangle.contains(point.getX(), point.getY());
+    }
+
+    public static double getDistanceToWall(CaPoint position, double absoluteHeading) {
+        return getDistanceToWall(getWall(position, absoluteHeading), position);
     }
 
     public static class Wall {

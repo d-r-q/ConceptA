@@ -2,6 +2,7 @@ package lxx.model;
 
 import lxx.ConceptA;
 import lxx.events.WavePassedEvent;
+import lxx.services.WavesService;
 import robocode.ScannedRobotEvent;
 
 import java.util.HashMap;
@@ -15,33 +16,39 @@ import java.util.Map;
  */
 public class BattleModel {
 
-    public Map<String, CaRobot> enemies = new HashMap<String, CaRobot>();
-    public Map<String, CaRobot> robots = new HashMap<String, CaRobot>();
-    private LinkedList<Wave> waves = new LinkedList<Wave>();
+    public final BattleModel prevState;
 
-    public CaRobot me;
-    private CaRobot duelOpponent;
-    public long time;
+    public final Map<String, CaRobot> enemies;
+
+    public final CaRobot me;
+    public final CaRobot duelOpponent;
+    public final long time;
 
     public BattleModel() {
-    }
-
-    private BattleModel(BattleModel original) {
-        this.me = original.me;
-        this.enemies = new HashMap<String, CaRobot>(original.enemies);
-        this.duelOpponent = original.duelOpponent;
-        this.time = original.time;
-    }
-
-    public void update(TurnEvents turnEvents) {
-        final BattleModel snapshot = new BattleModel(this);
-
+        prevState = null;
+        enemies = new HashMap<String, CaRobot>();
+        me = null;
+        duelOpponent = null;
         time = ConceptA.currentTime;
-        final CaRobotState nextState = CaRobotStateFactory.createState(turnEvents.statusEvent);
-        me = (me == null)
-                ? new CaRobot(nextState)
-                : new CaRobot(me, nextState);
+    }
 
+    public BattleModel(BattleModel prevState, CaRobot me, Map<String, CaRobot> enemies) {
+        this.prevState = prevState;
+        this.enemies = enemies;
+        this.me = me;
+        duelOpponent = enemies.size() == 1
+                ? enemies.values().iterator().next()
+                : null;
+        time = ConceptA.currentTime;
+    }
+
+    public BattleModel update(TurnEvents turnEvents) {
+        final CaRobotState nextState = CaRobotStateFactory.createState(turnEvents.statusEvent);
+        final CaRobot me = (this.me == null)
+                ? new CaRobot(nextState)
+                : new CaRobot(this.me, nextState);
+
+        final Map<String, CaRobot> enemies = new HashMap<String, CaRobot>(this.enemies);
         for (ScannedRobotEvent sre : turnEvents.scannedRobotEvents) {
             CaRobot enemy = enemies.get(sre.getName());
             final CaRobotState enemyNextState = CaRobotStateFactory.createState(turnEvents.statusEvent, sre);
@@ -50,45 +57,19 @@ public class BattleModel {
                     : new CaRobot(enemy, enemyNextState);
 
             enemies.put(enemy.getName(), enemy);
-            robots.put(enemy.getName(), enemy);
         }
 
-        robots.put(me.getName(), me);
-
-        for (CaRobot robot : robots.values()) {
-            if (robot.getFiredBulletSpeed() > 0) {
-                waves.add(new Wave(snapshot, robot.getFiredBulletSpeed(), robot));
-            }
-        }
-
-        final LinkedList<WavePassedEvent> wpEvents = new LinkedList<WavePassedEvent>();
-        for (Iterator<Wave> wavesIter = waves.iterator(); wavesIter.hasNext();) {
-            final Wave w = wavesIter.next();
-            wpEvents.addAll(w.check(this));
-
-            if (!w.hasRemainingTargets()) {
-                wavesIter.remove();
-            }
-        }
-
-        if (wpEvents.size() > 0) {
-            //for ()
-        }
-
-        if (enemies.size() == 1) {
-            duelOpponent = enemies.values().iterator().next();
-        }
+        return new BattleModel(this, me, enemies);
     }
 
-    public CaRobot duelOpponent() {
-        return duelOpponent;
+    public CaRobot getRobot(String name) {
+        if (me.getName().equals(name)) {
+            return me;
+        }
+        return enemies.get(name);
     }
 
-    public CaRobot[] getRobots() {
-        return robots.values().toArray(new CaRobot[robots.size()]);
-    }
-
-    public CaRobot getRobot(String robotName) {
-        return robots.get(robotName);
+    public boolean hasDuelOpponent() {
+        return duelOpponent != null;
     }
 }

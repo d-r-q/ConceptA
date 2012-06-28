@@ -34,4 +34,8 @@ public class CaGraphics {
             color = c;
         }
     }
+
+    public void drawCircle(CaPoint center, double radius) {
+        g.drawOval((int)round(center.x - radius), (int)round(center.y - radius), (int)round(radius * 2), (int)round(radius * 2));
+    }
 }

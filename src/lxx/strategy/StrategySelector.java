@@ -1,7 +1,10 @@
 package lxx.strategy;
 
 import lxx.ConceptA;
+import lxx.data.GuessFactor;
+import lxx.gun.GuessFactorGun;
 import lxx.model.BattleModel;
+import lxx.services.Context;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,16 +17,14 @@ public class StrategySelector {
 
     private final List<Strategy> strategies = new LinkedList<Strategy>();
 
-    private final BattleModel model;
-
-    public StrategySelector(BattleModel model, ConceptA me) {
-        this.model = model;
-
+    public StrategySelector(ConceptA me, Context context) {
         strategies.add(new FindEnemyStrategy(me));
+        GuessFactorGun gun = new GuessFactorGun(context.getWavesService());
+        me.addBattleModelListener(gun);
         strategies.add(new DuelStrategy(me));
     }
 
-    public Strategy selectStrategy() {
+    public Strategy selectStrategy(BattleModel model) {
 
         for (Strategy s : strategies) {
             if (s.applicable(model)) {

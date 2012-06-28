@@ -35,7 +35,7 @@ public class DuelStrategy implements Strategy {
         me.setAdjustRadarForGunTurn(true);
         me.setAdjustRadarForRobotTurn(true);
 
-        final CaRobot opponent = model.duelOpponent();
+        final CaRobot opponent = model.duelOpponent;
         final double angleToEnemy = model.me.angleTo(opponent);
 
         final MovementDecision md = randomMovement.getMovementDecision(model);
@@ -43,7 +43,7 @@ public class DuelStrategy implements Strategy {
         return new TurnDecision(
                 md.desiredVelocity, md.turnRate,
                 Utils.normalRelativeAngle(angleToEnemy - me.getGunHeadingRadians()), 3,
-                DuelRadar.getRadarTurnAngleRadians(model.me, model.duelOpponent()));
+                DuelRadar.getRadarTurnAngleRadians(model.me, model.duelOpponent));
     }
 
 }

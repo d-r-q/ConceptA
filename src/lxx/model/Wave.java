@@ -3,7 +3,6 @@ package lxx.model;
 import lxx.BattleConstants;
 import lxx.ConceptA;
 import lxx.events.WavePassedEvent;
-import lxx.util.CaConstants;
 import lxx.util.CaPoint;
 import lxx.util.CaUtils;
 import lxx.util.IntervalDouble;
@@ -21,39 +20,42 @@ public class Wave {
 
     private static final double NO_HIT_INTERVAL = 999;
 
-    private final Map<String, IntervalDouble> remainingTargets = new HashMap<String, IntervalDouble>();
+    private final Map<String, CaRobot> remainingTargets = new HashMap<String, CaRobot>();
+    private final Map<String, IntervalDouble> hitIntervals = new HashMap<String, IntervalDouble>();
 
-    public final BattleModel stateAtLaunchTime;
     public final double speed;
-    public final CaRobot owner;
+    public final CaPoint startPos;
+    public final long launchTime;
 
-    public Wave(BattleModel stateAtLaunchTime, double speed, CaRobot owner) {
-        this.stateAtLaunchTime = stateAtLaunchTime;
+    public Wave(CaPoint startPos, double speed, long launchTime, CaRobot ... targets) {
         this.speed = speed;
-        this.owner = owner;
+        this.startPos = startPos;
+        this.launchTime = launchTime;
 
-        for (CaRobot robot : stateAtLaunchTime.getRobots()) {
-            if (owner.equals(robot)) {
-                continue;
-            }
-            remainingTargets.put(robot.getName(), new IntervalDouble(NO_HIT_INTERVAL, NO_HIT_INTERVAL));
+        for (CaRobot robot : targets) {
+            hitIntervals.put(robot.getName(), new IntervalDouble(NO_HIT_INTERVAL, NO_HIT_INTERVAL));
+            remainingTargets.put(robot.getName(), robot);
         }
+    }
+
+    public Wave(CaPoint startPos, double speed, CaRobot ... targets) {
+        this(startPos, speed, ConceptA.currentTime - 1, targets);
     }
 
     public List<WavePassedEvent> check(BattleModel model) {
         final List<WavePassedEvent> events = new LinkedList<WavePassedEvent>();
-        final double travelledDistance = (ConceptA.currentTime - stateAtLaunchTime.time) * speed;
-        for (String rt : remainingTargets.keySet()) {
-            final CaRobot robot = model.getRobot(rt);
+        final double travelledDistance = getTravelledDistance();
+        for (String remainingTargetName : remainingTargets.keySet()) {
+            final CaRobot robot = model.getRobot(remainingTargetName);
             // todo: check robot is alive
-            final double alpha = owner.angleTo(robot);
-            final CaPoint bltPnt = owner.project(alpha, travelledDistance);
+            final double alpha = startPos.angleTo(robot.getPosition());
+            final CaPoint bltPnt = startPos.project(alpha, travelledDistance);
             if (BattleConstants.isRobotContains(robot.getPosition(), bltPnt)) {
-                final double halfRobotWidthRadians = CaUtils.getRobotWidthInRadians(owner.getPosition(), robot.getPosition()) / 2;
+                final double halfRobotWidthRadians = CaUtils.getRobotWidthInRadians(startPos, robot.getPosition()) / 2;
 
-                final IntervalDouble hitInterval = remainingTargets.get(robot.getName());
+                final IntervalDouble hitInterval = hitIntervals.get(robot.getName());
 
-                final double noBearingOffset = owner.angleTo(stateAtLaunchTime.getRobot(rt));
+                final double noBearingOffset = startPos.angleTo(remainingTargets.get(remainingTargetName).getPosition());
                 final double currentBearingOffset = alpha - noBearingOffset;
                 if (hitInterval.center() == NO_HIT_INTERVAL) {
                     hitInterval.a = alpha;
@@ -64,15 +66,20 @@ public class Wave {
 
                 hitInterval.extend(minBo);
                 hitInterval.extend(maxBo);
-            } else if (remainingTargets.get(robot.getName()).center() == NO_HIT_INTERVAL) {
-                events.add(new WavePassedEvent(this, robot, remainingTargets.remove(robot.getName())));
+            } else if (hitIntervals.get(robot.getName()).center() != NO_HIT_INTERVAL) {
+                events.add(new WavePassedEvent(this, robot, hitIntervals.remove(robot.getName())));
+                remainingTargets.remove(robot.getName());
             }
         }
 
         return events;
     }
 
+    public double getTravelledDistance() {
+        return (ConceptA.currentTime - launchTime) * speed;
+    }
+
     public boolean hasRemainingTargets() {
-        return remainingTargets.size() > 0;
+        return hitIntervals.size() > 0;
     }
 }
