@@ -1,5 +1,6 @@
 package lxx.strategy;
 
+import lxx.BattleConstants;
 import lxx.ConceptA;
 import lxx.model.BattleModel;
 import robocode.Rules;
@@ -18,7 +19,7 @@ public class FindEnemyStrategy implements Strategy {
 
     @Override
     public boolean applicable(BattleModel model) {
-        return model.enemies.size() == 0;
+        return model.enemies.size() < BattleConstants.totalEnemies && ConceptA.currentTime < 5;
     }
 
     @Override

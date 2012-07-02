@@ -1,4 +1,4 @@
-package lxx.strategy;
+package lxx.radar;
 
 import lxx.model.CaRobot;
 import lxx.util.CaConstants;

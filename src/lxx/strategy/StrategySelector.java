@@ -22,6 +22,7 @@ public class StrategySelector {
         GuessFactorGun gun = new GuessFactorGun(context.getWavesService());
         me.addBattleModelListener(gun);
         strategies.add(new DuelStrategy(me, gun));
+        strategies.add(new MeleeStrategy());
     }
 
     public Strategy selectStrategy(BattleModel model) {

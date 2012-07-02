@@ -45,6 +45,7 @@ public class ConceptA extends AdvancedRobot {
         BattleConstants.initialGunHeat = getGunHeat();
         BattleConstants.gunCoolingRate = getGunCoolingRate();
         BattleConstants.setRobotBounds(getWidth(), getHeight());
+        BattleConstants.totalEnemies = getOthers();
 
         int robotWidth = (int) getWidth();
         int robotHeight = (int) getHeight();

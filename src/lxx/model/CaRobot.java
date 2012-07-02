@@ -94,4 +94,5 @@ public class CaRobot extends CaRobotState {
     public double getMovementDirection() {
         return movementDirection;
     }
+
 }

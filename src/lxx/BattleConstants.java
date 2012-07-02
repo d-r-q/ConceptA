@@ -17,6 +17,7 @@ public class BattleConstants {
     public static double robotWidth;
     public static double robotHeight;
     public static double robotDiagonal;
+    public static int totalEnemies;
 
     private BattleConstants() {
     }

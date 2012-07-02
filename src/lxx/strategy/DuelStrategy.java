@@ -6,7 +6,7 @@ import lxx.model.BattleModel;
 import lxx.model.CaRobot;
 import lxx.movement.MovementDecision;
 import lxx.movement.RandomMovement;
-import lxx.util.CaPoint;
+import lxx.radar.DuelRadar;
 import robocode.Rules;
 import robocode.util.Utils;
 
