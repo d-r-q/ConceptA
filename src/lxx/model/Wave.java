@@ -26,13 +26,15 @@ public class Wave {
 
     public final BattleModel fireTimeState;
     public final double speed;
+    public final CaRobotState owner;
     public final CaPoint startPos;
     public final long launchTime;
 
-    public Wave(BattleModel fireTimeState, CaPoint startPos, double speed, CaRobot... targets) {
+    public Wave(BattleModel fireTimeState, CaRobotState owner, double speed, CaRobot... targets) {
         this.fireTimeState = fireTimeState;
         this.speed = speed;
-        this.startPos = startPos;
+        this.owner = owner;
+        this.startPos = owner.getPosition();
         this.launchTime = fireTimeState.time;
 
         for (CaRobot robot : targets) {

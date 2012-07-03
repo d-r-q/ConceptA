@@ -67,7 +67,7 @@ public class BattleModel {
         for (Map.Entry<String, List<Event>> e : events.entrySet()) {
             CaRobot robot = enemies.get(e.getKey());
             final CaRobotState enemyNextState = CaRobotStateFactory.getAnotherRobotState(me, robot != null ? robot
-                    : new CaRobot(new CaRobotState(e.getKey(), new CaPoint(), 0, 0, 0, 0, false)), e.getValue());
+                    : new CaRobot(new CaRobotState(e.getKey(), new CaPoint(), 0, 0, 0, 0, false, 0, BattleConstants.initialGunHeat - BattleConstants.gunCoolingRate * ConceptA.currentTime)), e.getValue());
             robot = (robot == null)
                     ? new CaRobot(enemyNextState)
                     : new CaRobot(robot, enemyNextState);

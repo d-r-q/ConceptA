@@ -1,5 +1,6 @@
 package lxx.services;
 
+import lxx.BattleConstants;
 import lxx.events.WavePassedEvent;
 import lxx.model.BattleModel;
 import lxx.model.BattleModelListener;
@@ -7,7 +8,6 @@ import lxx.model.CaRobot;
 import lxx.model.Wave;
 import lxx.paint.Canvas;
 import lxx.paint.Circle;
-import lxx.util.CaPoint;
 
 import java.awt.*;
 import java.util.Iterator;
@@ -20,11 +20,13 @@ import java.util.List;
  */
 public class WavesService implements BattleModelListener {
 
-    public static final Color WAVE_COLOR = new Color(0, 200, 255, 135);
+    public static final Color MY_WAVE_COLOR = new Color(0, 150, 255, 135);
+    public static final Color ENEMY_WAVE_COLOR = new Color(255, 50, 0, 135);
+    public static final Color TEAMMATE_WAVE_COLOR = new Color(100, 255, 0, 135);
     private LinkedList<W> waves = new LinkedList<W>();
 
-    public void launchWave(BattleModel fireTimeState, CaPoint startPos, double speed, WaveCallback waveCallback, CaRobot... targets) {
-        final Wave w = new Wave(fireTimeState, startPos, speed, targets);
+    public void launchWave(BattleModel fireTimeState, CaRobot owner, double speed, WaveCallback waveCallback, CaRobot... targets) {
+        final Wave w = new Wave(fireTimeState, owner, speed, targets);
         waves.add(new W(w, waveCallback));
     }
 
@@ -39,7 +41,15 @@ public class WavesService implements BattleModelListener {
                 }
             }
             if (Canvas.WAVES.enabled()) {
-                Canvas.WAVES.draw(new Circle(w.w.startPos, w.w.getTravelledDistance()), WAVE_COLOR);
+                final Color c;
+                if (w.w.owner.getName().equals(BattleConstants.myName)) {
+                    c = MY_WAVE_COLOR;
+                } else if (BattleConstants.isTeammate(w.w.owner.getName())) {
+                    c = TEAMMATE_WAVE_COLOR;
+                } else {
+                    c = ENEMY_WAVE_COLOR;
+                }
+                Canvas.WAVES.draw(new Circle(w.w.startPos, w.w.getTravelledDistance()), c);
             }
 
             if (!w.w.hasRemainingTargets()) {

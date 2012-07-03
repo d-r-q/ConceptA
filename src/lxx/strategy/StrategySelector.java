@@ -2,6 +2,7 @@ package lxx.strategy;
 
 import lxx.ConceptA;
 import lxx.data.GuessFactor;
+import lxx.data.MovementDataManager;
 import lxx.gun.GuessFactorGun;
 import lxx.model.BattleModel;
 import lxx.services.Context;
@@ -22,6 +23,7 @@ public class StrategySelector {
         strategies.add(new FindEnemyStrategy(me));
         GuessFactorGun gun = new GuessFactorGun(context.getWavesService());
         me.addBattleModelListener(gun);
+        me.addBattleModelListener(new MovementDataManager(context.getWavesService()));
         strategies.add(new DuelStrategy(me, gun));
         strategies.add(new TeamStrategy());
         strategies.add(new MeleeStrategy());

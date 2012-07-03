@@ -19,11 +19,13 @@ public class CaRobotState {
     protected final Double radarHeading;
     protected final Double gunHeading;
     protected final boolean alive;
+    protected final double firePower;
+    protected final double gunHeat;
 
     protected final double speed;
 
     public CaRobotState(String name, CaPoint position, double velocity, double heading, double energy, long time, boolean alive,
-                        Double radarHeading, Double gunHeading) {
+                        double firePower, double gunHeat, Double radarHeading, Double gunHeading) {
         this.name = name;
         this.position = position;
         this.velocity = velocity;
@@ -33,13 +35,16 @@ public class CaRobotState {
         this.radarHeading = radarHeading;
         this.gunHeading = gunHeading;
         this.alive = alive;
+        this.firePower = firePower;
+        this.gunHeat = gunHeat;
 
         this.speed = abs(velocity);
     }
 
-    public CaRobotState(String name, CaPoint position, double velocity, double heading, double energy, long time, boolean alive) {
+    public CaRobotState(String name, CaPoint position, double velocity, double heading, double energy, long time, boolean alive,
+                        double firePower, double gunHeat) {
         // nulls for fast detecting of using object, which represents an enemy instead of ConceptA
-        this(name, position, velocity, heading, energy, time, alive, null, null);
+        this(name, position, velocity, heading, energy, time, alive, firePower, gunHeat, null, null);
     }
 
     public String getName() {
@@ -88,6 +93,14 @@ public class CaRobotState {
 
     public double getGunHeading() {
         return gunHeading;
+    }
+
+    public double getFirePower() {
+        return firePower;
+    }
+
+    public double getGunHeat() {
+        return gunHeat;
     }
 
     @Override

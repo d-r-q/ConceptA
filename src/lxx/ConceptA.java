@@ -104,6 +104,10 @@ public class ConceptA extends TeamRobot {
                 addEvent(res, e, ((RobotDeathEvent) e).getName());
             } else if (e instanceof DeathEvent) {
                 addEvent(res, e, getName());
+            } else if (e instanceof HitByBulletEvent) {
+                addEvent(res, e, ((HitByBulletEvent) e).getName());
+            } else if (e instanceof BulletHitEvent) {
+                addEvent(res, e, ((BulletHitEvent) e).getName());
             }
         }
         addEvent(res, statusEvent, getName());
@@ -138,8 +142,9 @@ public class ConceptA extends TeamRobot {
             BattleConstants.teammates = getTeammates() != null ? getTeammates().length : 0;
             BattleConstants.teammatesNames = getTeammates();
             final Matcher matcher = Pattern.compile(".*\\((\\d*)\\)").matcher(getName());
-            matcher.find();
-            BattleConstants.myIndex = new Integer(matcher.group(1));
+            if (matcher.find()) {
+                BattleConstants.myIndex = new Integer(matcher.group(1));
+            }
         }
 
         currentTime = getTime();

@@ -2,7 +2,6 @@ package lxx.gun;
 
 import ags.utils.KdTree;
 import lxx.data.DataSource;
-import lxx.data.GuessFactor;
 import lxx.data.KnnDataSource;
 import lxx.model.BattleModel;
 import lxx.model.BattleModelListener;
@@ -12,6 +11,7 @@ import lxx.services.WaveCallback;
 import lxx.services.WavesService;
 import lxx.util.CaUtils;
 import lxx.util.IntervalDouble;
+import robocode.Rules;
 
 import java.util.List;
 
@@ -48,9 +48,9 @@ public class GuessFactorGun implements BattleModelListener, WaveCallback {
             return;
         }
 
-        final double firedBulletSpeed = newState.me.getFiredBulletSpeed();
-        if (firedBulletSpeed > 0) {
-            wavesService.launchWave(newState.prevState, newState.prevState.me.getPosition(), firedBulletSpeed, this, newState.duelOpponent);
+        if (newState.me.getFirePower() > 0) {
+            final double firedBulletSpeed = Rules.getBulletSpeed(newState.me.getFirePower());
+            wavesService.launchWave(newState.prevState, newState.prevState.me, firedBulletSpeed, this, newState.duelOpponent);
         }
     }
 

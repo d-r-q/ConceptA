@@ -20,6 +20,8 @@ public class CaConstants {
     public static final double RADIANS_270 = toRadians(270);
     public static final double RADIANS_360 = toRadians(360);
 
+    public static final double ROBOT_HIT_DAMAGE = 0.6;
+
     private CaConstants() {
     }
 }
