@@ -3,6 +3,7 @@ package lxx.strategy;
 import lxx.model.BattleField;
 import lxx.model.BattleModel;
 import lxx.model.CaRobot;
+import lxx.movement.MovementDecision;
 import lxx.util.CaConstants;
 import lxx.util.CaPoint;
 import lxx.util.CaUtils;
@@ -21,7 +22,7 @@ public class MeleeStrategy implements Strategy {
 
     @Override
     public boolean applicable(BattleModel model) {
-        return model.enemies.size() > 1;
+        return model.aliveEnemies.size() > 1;
     }
 
     @Override
@@ -31,19 +32,10 @@ public class MeleeStrategy implements Strategy {
             selectDestination(model);
         }
 
-        final double desiredDirection = me.getPosition().angleTo(destination);
-        final double desiredVelocity;
-        final double turnRate;
-        if (CaUtils.anglesDiff(me.getHeading(), desiredDirection) < CaConstants.RADIANS_90) {
-            desiredVelocity = Rules.MAX_VELOCITY;
-            turnRate = Utils.normalRelativeAngle(desiredDirection - me.getHeading());
-        } else {
-            desiredVelocity = -Rules.MAX_VELOCITY;
-            turnRate = Utils.normalRelativeAngle(desiredDirection - Utils.normalAbsoluteAngle(me.getHeading() + CaConstants.RADIANS_180));
-        }
+        final MovementDecision md = MovementDecision.getMovementDecision(me, destination);
 
 
-        return new TurnDecision(desiredVelocity, turnRate, Utils.normalRelativeAngle(getFireAngle(model) - me.getGunHeading()), 3, Double.POSITIVE_INFINITY);
+        return new TurnDecision(md.desiredVelocity, md.turnRate, Utils.normalRelativeAngle(getFireAngle(model) - me.getGunHeading()), 3, Double.POSITIVE_INFINITY);
     }
 
     private double getFireAngle(BattleModel model) {

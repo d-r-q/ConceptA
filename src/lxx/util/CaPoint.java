@@ -14,6 +14,9 @@ public class CaPoint extends Point2D {
     public double x;
     public double y;
 
+    public CaPoint() {
+    }
+
     public CaPoint(double x, double y) {
         this.x = x;
         this.y = y;

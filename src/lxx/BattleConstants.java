@@ -18,6 +18,9 @@ public class BattleConstants {
     public static double robotHeight;
     public static double robotDiagonal;
     public static int totalEnemies;
+    public static int teammates;
+    public static String[] teammatesNames;
+    public static int myIndex;
 
     private BattleConstants() {
     }
@@ -31,4 +34,18 @@ public class BattleConstants {
         robotHeight = height;
         robotDiagonal = Math.sqrt(FastMath.pow(width, 2) + FastMath.pow(height, 2));
     }
+
+    public static boolean isTeammate(String name) {
+        if (teammatesNames == null) {
+            return false;
+        }
+        for (String teammateName : teammatesNames) {
+            if (teammateName.equals(name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

@@ -29,7 +29,7 @@ public class DuelStrategy implements Strategy {
 
     @Override
     public boolean applicable(BattleModel model) {
-        return model.enemies.size() == 1;
+        return model.aliveEnemies.size() == 1;
     }
 
     @Override

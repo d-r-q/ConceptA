@@ -8,15 +8,17 @@ import lxx.services.Context;
 import lxx.strategy.StrategySelector;
 import lxx.strategy.TurnDecision;
 import lxx.util.Log;
-import robocode.AdvancedRobot;
-import robocode.Bullet;
-import robocode.DeathEvent;
-import robocode.StatusEvent;
+import robocode.*;
+import robocode.Event;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.signum;
@@ -25,7 +27,7 @@ import static java.lang.Math.signum;
  * User: Aleksey Zhidkov
  * Date: 18.06.12
  */
-public class ConceptA extends AdvancedRobot {
+public class ConceptA extends TeamRobot {
 
     public static long currentTime;
     public static long currentRound;
@@ -41,16 +43,11 @@ public class ConceptA extends AdvancedRobot {
     @Override
     public void run() {
         final Context context = new Context(this);
-        BattleConstants.myName = getName();
-        BattleConstants.initialGunHeat = getGunHeat();
-        BattleConstants.gunCoolingRate = getGunCoolingRate();
-        BattleConstants.setRobotBounds(getWidth(), getHeight());
-        BattleConstants.totalEnemies = getOthers();
 
         int robotWidth = (int) getWidth();
         int robotHeight = (int) getHeight();
 
-        BattleField.init(robotWidth / 2, robotHeight / 2, (int)getBattleFieldWidth() - robotWidth, (int)getBattleFieldHeight() - robotHeight);
+        BattleField.init(robotWidth / 2, robotHeight / 2, (int) getBattleFieldWidth() - robotWidth, (int) getBattleFieldHeight() - robotHeight);
 
         currentRound = getRoundNum();
 
@@ -97,15 +94,33 @@ public class ConceptA extends AdvancedRobot {
         }
     }
 
-    private TurnEvents getTurnEvents(StatusEvent e) {
-        final FireEvent fireEvent = firedBullet == null
-                ? null
-                : new FireEvent(firedBullet);
-        final TurnEvents turnEvents = new TurnEvents(getScannedRobotEvents(), e, fireEvent);
-        getScannedRobotEvents().clear();
-        getStatusEvents().clear();
+    private Map<String, List<Event>> getRobotsEvents(StatusEvent statusEvent) {
+        final Map<String, List<Event>> res = new HashMap<String, List<Event>>();
+        for (Event e : getAllEvents()) {
+            if (e instanceof ScannedRobotEvent) {
+                final String name = ((ScannedRobotEvent) e).getName();
+                addEvent(res, e, name);
+            } else if (e instanceof RobotDeathEvent) {
+                addEvent(res, e, ((RobotDeathEvent) e).getName());
+            } else if (e instanceof DeathEvent) {
+                addEvent(res, e, getName());
+            }
+        }
+        addEvent(res, statusEvent, getName());
+        if (firedBullet != null) {
+            addEvent(res, new FireEvent(currentTime, firedBullet), getName());
+        }
 
-        return turnEvents;
+        return res;
+    }
+
+    private void addEvent(Map<String, List<Event>> res, Event e, String name) {
+        List<Event> events = res.get(name);
+        if (events == null) {
+            events = new LinkedList<Event>();
+            res.put(name, events);
+        }
+        events.add(e);
     }
 
     public void addTickListener(TickListener tl) {
@@ -114,8 +129,21 @@ public class ConceptA extends AdvancedRobot {
 
     @Override
     public void onStatus(StatusEvent e) {
+        if (BattleConstants.myName == null) {
+            BattleConstants.myName = getName();
+            BattleConstants.initialGunHeat = getGunHeat();
+            BattleConstants.gunCoolingRate = getGunCoolingRate();
+            BattleConstants.setRobotBounds(getWidth(), getHeight());
+            BattleConstants.totalEnemies = getOthers();
+            BattleConstants.teammates = getTeammates() != null ? getTeammates().length : 0;
+            BattleConstants.teammatesNames = getTeammates();
+            final Matcher matcher = Pattern.compile(".*\\((\\d*)\\)").matcher(getName());
+            matcher.find();
+            BattleConstants.myIndex = new Integer(matcher.group(1));
+        }
+
         currentTime = getTime();
-        final BattleModel newState = model.update(getTurnEvents(e));
+        final BattleModel newState = model.update(getRobotsEvents(e));
 
         for (BattleModelListener listener : bmListeners) {
             listener.battleModelUpdated(newState);
@@ -169,4 +197,5 @@ public class ConceptA extends AdvancedRobot {
     public void addBattleModelListener(BattleModelListener listener) {
         bmListeners.add(listener);
     }
+
 }

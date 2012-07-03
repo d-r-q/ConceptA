@@ -2,9 +2,9 @@ package lxx.model;
 
 import lxx.BattleConstants;
 import lxx.util.CaPoint;
-import robocode.RobotStatus;
-import robocode.ScannedRobotEvent;
-import robocode.StatusEvent;
+import robocode.*;
+
+import java.util.List;
 
 /**
  * User: Aleksey Zhidkov
@@ -12,20 +12,48 @@ import robocode.StatusEvent;
  */
 public class CaRobotStateFactory {
 
-    public static CaRobotState createState(StatusEvent e) {
+    public static CaRobotState getMyState(List<Event> events) {
+        RobotStatus status = null;
+        long time = -1;
+        DeathEvent de = null;
+        for (Event e : events) {
+            if (e instanceof StatusEvent) {
+                final StatusEvent statusEvent = (StatusEvent) e;
+                status = statusEvent.getStatus();
+                time = e.getTime();
+            } else if (e instanceof DeathEvent) {
+                de = (DeathEvent) e;
+            }
+        }
 
-        final RobotStatus status = e.getStatus();
+        if (status == null) {
+            throw new RuntimeException("Something wrong");
+        }
+
         return new CaRobotState(BattleConstants.myName, new CaPoint(status.getX(), status.getY()), status.getVelocity(),
-                status.getHeadingRadians(), status.getEnergy(), e.getTime(), status.getRadarHeadingRadians(), status.getGunHeadingRadians());
+                status.getHeadingRadians(), status.getEnergy(), time, de != null, status.getRadarHeadingRadians(), status.getGunHeadingRadians());
     }
 
-    public static CaRobotState createState(StatusEvent e, ScannedRobotEvent se) {
-        final RobotStatus status = e.getStatus();
+    public static CaRobotState getAnotherRobotState(CaRobot me, CaRobot prevState, List<Event> events) {
+        CaPoint pos = prevState.position;
+        double velocity = prevState.velocity;
+        double heading = prevState.heading;
+        double energy = prevState.energy;
+        boolean alive = true;
 
-        final CaPoint enemyPos = new CaPoint(status.getX(), status.getY()).
-                project(status.getHeadingRadians() + se.getBearingRadians(), se.getDistance());
+        for (Event e : events) {
+            if (e instanceof RobotDeathEvent) {
+                alive = false;
+            } else if (e instanceof ScannedRobotEvent) {
+                final ScannedRobotEvent se = (ScannedRobotEvent) e;
+                pos = me.getPosition(). project(me.getHeading() + se.getBearingRadians(), se.getDistance());
+                velocity = se.getVelocity();
+                heading = se.getHeadingRadians();
+                energy = se.getEnergy();
+            }
+        }
 
-        return new CaRobotState(se.getName(), enemyPos, se.getVelocity(), se.getHeadingRadians(), se.getEnergy(), se.getTime());
+        return new CaRobotState(prevState.getName(), pos, velocity, heading, energy, events.get(0).getTime(), alive);
     }
 
 }

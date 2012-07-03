@@ -3,7 +3,7 @@
 <project name="ConceptA" basedir="."
          default="release">
     <property file="excluded\build.properties"/>
-    <property name="robot.version" value="0.5"/>
+    <property name="robot.version" value="0.6"/>
     <property name="robot.name" value="ConceptA"/>
 
     <path id="src.files">
@@ -54,6 +54,15 @@
             robot.webpage=http://www.robowiki.net/wiki/${robot.name}
         </echo>
 
+        <echo file="${bin.dir}/lxx/${robot.name}Team.team">
+            #Team Properties
+            team.members=lxx.${robot.name} ${robot.version},lxx.${robot.name} ${robot.version},lxx.${robot.name} ${robot.version},lxx.${robot.name} ${robot.version},lxx.${robot.name} ${robot.version}
+            team.author.name=Alexey jdev Zhidkov
+            team.webpage=http://www.robowiki.net/wiki/${robot.name}
+            team.description=New day, new life. Build time: ${TODAY} ${NOW}
+            team.version= ${robot.version}
+        </echo>
+
         <echo file="${bin.dir}/lxx/${robot.name}.data/${robot.name}.properties">lxx.${robot.name}.mode=normal
         </echo>
 
@@ -64,9 +73,6 @@
         <copy todir="${robocode.dir}\robots\">
             <fileset file="${builds.dir}\lxx.${robot.name}_${robot.version}.jar"/>
         </copy>
-
-        <echo>${robocode.dir}\robots\</echo>
-        <echo>${builds.dir}\lxx.${robot.name}_${robot.version}.jar</echo>
 
         <delete includeEmptyDirs="true">
             <fileset dir="${bin.dir}" includes="**/*"/>

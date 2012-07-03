@@ -24,7 +24,7 @@ public class CaRobot extends CaRobotState {
 
     public CaRobot(CaRobotState currentState) {
         super(currentState.name, currentState.position, currentState.velocity, currentState.heading, currentState.energy, currentState.time,
-                currentState.radarHeading, currentState.gunHeading);
+                currentState.alive, currentState.radarHeading, currentState.gunHeading);
 
         acceleration = 0;
         movementDirection = currentState.heading;
@@ -34,7 +34,7 @@ public class CaRobot extends CaRobotState {
 
     public CaRobot(CaRobot prevState, CaRobotState currentState) {
         super(currentState.name, currentState.position, currentState.velocity, currentState.heading, currentState.energy, currentState.time,
-                currentState.radarHeading, currentState.gunHeading);
+                currentState.alive, currentState.radarHeading, currentState.gunHeading);
 
         acceleration = calculateAcceleration(prevState, currentState);
         if (currentState.speed == 0) {
