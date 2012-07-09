@@ -13,7 +13,9 @@ public enum Canvas {
 
     RANDOM_MOVEMENT(true),
     MISK(true),
-    WAVES(true);
+    WAVES(true),
+    BULLET_HITS(false),
+    WAVE_SURFING(true);
 
     private LinkedList<DrawCommand> drawables = new LinkedList<DrawCommand>();
 

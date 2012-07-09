@@ -16,9 +16,9 @@ public class KnnDataSource<V> implements DataSource<BattleModel, V, KdTree.Entry
     private final KdTree<V> tree;
     private final LocationFactory locationFactory;
 
-    public KnnDataSource(LocationFactory locationFactory) {
+    public KnnDataSource(LocationFactory locationFactory, int sizeLimit) {
         this.locationFactory = locationFactory;
-        this.tree = new KdTree.Manhattan<V>(locationFactory.getDimensions(), 10000);
+        this.tree = new KdTree.Manhattan<V>(locationFactory.getDimensions(), sizeLimit);
     }
 
     @Override

@@ -1,6 +1,5 @@
-package lxx.gun;
+package lxx.data;
 
-import lxx.data.LocationFactory;
 import lxx.model.BattleField;
 import lxx.model.BattleModel;
 import lxx.model.CaRobot;
@@ -13,6 +12,14 @@ import robocode.util.Utils;
  */
 public class SimpleEnemyMovement implements LocationFactory {
 
+    private final String targetName;
+    private final String attackerName;
+
+    public SimpleEnemyMovement(String targetName, String attackerName) {
+        this.targetName = targetName;
+        this.attackerName = attackerName;
+    }
+
     @Override
     public int getDimensions() {
         return 4;
@@ -20,17 +27,18 @@ public class SimpleEnemyMovement implements LocationFactory {
 
     @Override
     public double[] getLocation(BattleModel battleModel) {
-        final CaRobot enemy = battleModel.duelOpponent;
+        final CaRobot enemy = battleModel.getRobot(targetName);
         final double movementDirection;
         if (Double.isNaN(enemy.getMovementDirection())) {
             movementDirection = enemy.getHeading();
         } else {
             movementDirection = enemy.getMovementDirection();
         }
+        final CaRobot me = battleModel.getRobot(attackerName);
         return new double[]{
-                battleModel.me.getPosition().distance(enemy.getPosition()) / BattleField.diagonal * 3,
+                me.getPosition().distance(enemy.getPosition()) / BattleField.diagonal * 3,
                 enemy.getSpeed() / 8 * 3,
-                Utils.normalRelativeAngle(movementDirection - battleModel.me.angleTo(enemy)) / CaConstants.RADIANS_180 * 2,
+                Utils.normalRelativeAngle(movementDirection - me.angleTo(enemy)) / CaConstants.RADIANS_180 * 2,
                 BattleField.getDistanceToWall(enemy.getPosition(), movementDirection) / BattleField.diagonal
         };
     }

@@ -16,7 +16,7 @@ public class RandomMovement implements TickListener {
     private long timeToChangeDir = 0;
 
     public MovementDecision getMovementDecision(BattleModel model) {
-        return orbitMovement.makeDecision(model, model.duelOpponent.getPosition(), orbitDirection);
+        return orbitMovement.makeDecision(model.me, model.duelOpponent.getPosition(), orbitDirection);
     }
 
     private static OrbitDirection reverse(OrbitDirection dir) {

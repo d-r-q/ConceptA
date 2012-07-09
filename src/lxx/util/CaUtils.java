@@ -42,7 +42,7 @@ public class CaUtils {
     }
 
     public static double angle(CaPoint base, CaPoint to) {
-        return FastMath.atan2(to.x - base.x, to.y - base.y);
+        return angle(base.x, base.y, to.x, to.y);
     }
 
     public static double anglesDiff(double angle1, double angle2) {

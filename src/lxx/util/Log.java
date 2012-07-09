@@ -34,7 +34,17 @@ public class Log {
         return logLevel >= WARN_LEVEL;
     }
 
+    public static boolean isErrorEnabled() {
+        return logLevel >= ERROR_LEVEL;
+    }
+
     public static void warn(String msg) {
         System.out.println("[WARN][" + ConceptA.currentRound + ":" + ConceptA.currentTime + "]: " + msg);
     }
+
+    public static void printStackTrace(Exception e) {
+        System.out.println("[ERROR][" + ConceptA.currentRound + ":" + ConceptA.currentTime + "]: ");
+        e.printStackTrace();
+    }
+
 }

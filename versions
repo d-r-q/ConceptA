@@ -1,3 +1,8 @@
+v. 0.7
+* Simple true single wave surfing implemented
+* Fire at zero bearing offset, when enemy's energy is 0
+* Use one datasource per enemy in gun
+
 v. 0.6
 * Robots state updating algorithm changed
 * Teams support added
@@ -7,7 +12,7 @@ v. 0.5
 * Simple melee strategy added
 
 v. 0.4
-* Simple gf gun implemented
+* Simple bo gun implemented
 * Second quest completed - now ConceptA beats the Walls:)
 
 v. 0.3.1

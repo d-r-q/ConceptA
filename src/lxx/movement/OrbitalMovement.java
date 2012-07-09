@@ -28,10 +28,10 @@ public class OrbitalMovement {
         this.desiredDistance = desiredDistance;
     }
 
-    public MovementDecision makeDecision(BattleModel model, CaPoint center, OrbitDirection direction) {
-        double desiredHeading = getDesiredHeading(model, center, direction);
+    public MovementDecision makeDecision(CaRobot me, CaPoint center, OrbitDirection direction) {
+        double desiredHeading = getDesiredHeading(me, center, direction);
 
-        final CaPoint myPos = model.me.getPosition();
+        final CaPoint myPos = me.getPosition();
         if (Canvas.RANDOM_MOVEMENT.enabled()) {
             Canvas.RANDOM_MOVEMENT.draw(new Arrow(myPos, desiredHeading, ARROW_LENGTH, 7), Color.RED);
         }
@@ -43,7 +43,7 @@ public class OrbitalMovement {
             Canvas.RANDOM_MOVEMENT.draw(new Arrow(myPos, desiredHeading, ARROW_LENGTH, 7), Color.GREEN);
         }
 
-        return toMovementDecision(model.me, getDesiredSpeed(direction), desiredHeading);
+        return toMovementDecision(me, getDesiredSpeed(direction), desiredHeading);
     }
 
     public static MovementDecision toMovementDecision(CaRobot robot, double desiredSpeed, double desiredHeading) {
@@ -73,9 +73,7 @@ public class OrbitalMovement {
         return desiredVelocity;
     }
 
-    private double getDesiredHeading(BattleModel model, CaPoint center, OrbitDirection direction) {
-        final CaRobot me = model.me;
-
+    private double getDesiredHeading(CaRobot me, CaPoint center, OrbitDirection direction) {
         if (direction == OrbitDirection.STOP) {
             return me.getHeading();
         }

@@ -2,15 +2,15 @@ package lxx.model;
 
 import lxx.BattleConstants;
 import lxx.events.FireEvent;
+import lxx.movement.MovementDecision;
 import lxx.util.CaConstants;
 import lxx.util.CaPoint;
+import lxx.util.CaUtils;
 import robocode.*;
 
 import java.util.List;
 
-import static java.lang.Math.PI;
-import static java.lang.Math.abs;
-import static java.lang.Math.max;
+import static java.lang.Math.*;
 
 /**
  * User: Aleksey Zhidkov
@@ -103,6 +103,32 @@ public class CaRobotStateFactory {
 
         return prevState.getPosition().distance(curPos) -
                 prevState.getPosition().distance(prevState.getPosition().project(curHeading, curVelocity)) < -1.1;
+    }
+
+    public static CaRobotState apply(CaRobot robot, MovementDecision md) {
+        final double turnRateLimit = Rules.getTurnRateRadians(robot.getSpeed());
+        final double newHeading = robot.getHeading() + CaUtils.limit(-turnRateLimit, md.turnRate, turnRateLimit);
+        final double newVelocity = getNewVelocity(robot.getVelocity(), md.desiredVelocity);
+        final CaPoint newPos = robot.getPosition().project(newHeading, newVelocity);
+
+        return new CaRobotState(robot.getName(), newPos, newVelocity, newHeading, robot.getEnergy(), robot.getTime() + 1,
+                robot.isAlive(), robot.firePower, max(0, robot.getGunHeat() - BattleConstants.gunCoolingRate),
+                null, null);
+    }
+
+    // package access for unit test
+    static double getNewVelocity(double currentVelocity, double desiredVelocity) {
+        if (currentVelocity == 0 || signum(currentVelocity) == signum(desiredVelocity)) {
+            final double desiredAcceleration = abs(desiredVelocity) - abs(currentVelocity);
+            return CaUtils.limit(-Rules.MAX_VELOCITY,
+                    currentVelocity + CaUtils.limit(-Rules.DECELERATION, desiredAcceleration, Rules.ACCELERATION) * signum(desiredVelocity),
+                    Rules.MAX_VELOCITY);
+        } else if (abs(currentVelocity) >= Rules.DECELERATION) {
+            return (currentVelocity - Rules.DECELERATION * (signum(currentVelocity)));
+        } else {
+            final double acceleration = 1 - abs(currentVelocity) / Rules.DECELERATION;
+            return acceleration * signum(desiredVelocity);
+        }
     }
 
 }

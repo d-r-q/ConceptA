@@ -1,8 +1,9 @@
 package lxx.gun;
 
 import ags.utils.KdTree;
-import lxx.data.DataSource;
+import lxx.BattleConstants;
 import lxx.data.KnnDataSource;
+import lxx.data.SimpleEnemyMovement;
 import lxx.model.BattleModel;
 import lxx.model.BattleModelListener;
 import lxx.model.CaRobot;
@@ -13,7 +14,9 @@ import lxx.util.CaUtils;
 import lxx.util.IntervalDouble;
 import robocode.Rules;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: Aleksey Zhidkov
@@ -21,7 +24,7 @@ import java.util.List;
  */
 public class GuessFactorGun implements BattleModelListener, WaveCallback {
 
-    private static final DataSource<BattleModel, Double, KdTree.Entry<Double>> dataSource = new KnnDataSource<Double>(new SimpleEnemyMovement());
+    private static final Map<String, KnnDataSource<Double>> dataSources = new HashMap<String, KnnDataSource<Double>>();
 
     private final WavesService wavesService;
 
@@ -30,6 +33,10 @@ public class GuessFactorGun implements BattleModelListener, WaveCallback {
     }
 
     public double aim(BattleModel battleModel, double bulletSpeed) {
+        final KnnDataSource<Double> dataSource = dataSources.get(battleModel.duelOpponent.getName());
+        if (dataSource == null || battleModel.duelOpponent.getEnergy() == 0) {
+            return 0;
+        }
         final List<KdTree.Entry<Double>> entries = dataSource.get(battleModel);
         if (entries.size() == 0) {
             return 0;
@@ -57,6 +64,11 @@ public class GuessFactorGun implements BattleModelListener, WaveCallback {
     @Override
     public void wavePassed(Wave w, CaRobot passedRobot, IntervalDouble hitInterval) {
         final double fireTimeLatDir = CaUtils.getNonZeroLateralDirection(w.fireTimeState.me.getPosition(), w.fireTimeState.duelOpponent);
+        KnnDataSource<Double> dataSource = dataSources.get(passedRobot.getName());
+        if (dataSource == null) {
+            dataSource = new KnnDataSource<Double>(new SimpleEnemyMovement(passedRobot.getName(), BattleConstants.myName), 10000);
+            dataSources.put(passedRobot.getName(), dataSource);
+        }
         dataSource.add(w.fireTimeState, hitInterval.center() / CaUtils.getMaxEscapeAngle(w.speed) * fireTimeLatDir);
     }
 }

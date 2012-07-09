@@ -21,10 +21,9 @@ public class StrategySelector {
     public StrategySelector(ConceptA me, Context context) {
         strategies.add(new WinStrategy());
         strategies.add(new FindEnemyStrategy(me));
-        GuessFactorGun gun = new GuessFactorGun(context.getWavesService());
+        final GuessFactorGun gun = new GuessFactorGun(context.getWavesService());
         me.addBattleModelListener(gun);
-        me.addBattleModelListener(new MovementDataManager(context.getWavesService()));
-        strategies.add(new DuelStrategy(me, gun));
+        strategies.add(new DuelStrategy(me, context, gun));
         strategies.add(new TeamStrategy());
         strategies.add(new MeleeStrategy());
     }

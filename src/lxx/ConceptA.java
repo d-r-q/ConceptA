@@ -1,7 +1,9 @@
 package lxx;
 
 import lxx.events.FireEvent;
-import lxx.model.*;
+import lxx.model.BattleField;
+import lxx.model.BattleModel;
+import lxx.model.BattleModelListener;
 import lxx.paint.CaGraphics;
 import lxx.paint.Canvas;
 import lxx.services.Context;
@@ -39,10 +41,11 @@ public class ConceptA extends TeamRobot {
 
     private boolean isAlive = true;
     private Bullet firedBullet;
+    private Context context;
 
     @Override
     public void run() {
-        final Context context = new Context(this);
+        context = new Context(this);
 
         int robotWidth = (int) getWidth();
         int robotHeight = (int) getHeight();
@@ -64,17 +67,24 @@ public class ConceptA extends TeamRobot {
 
         while (isAlive) {
             // model updated in onStatus
-            for (TickListener tl : tickListeners) {
-                tl.tick();
+            try {
+                for (TickListener tl : tickListeners) {
+                    tl.tick();
+                }
+
+                final TurnDecision turnDecision = strategySelector.selectStrategy(model).getTurnDecision(model);
+                move(turnDecision);
+                handleGun(turnDecision);
+                setTurnRadarRight(turnDecision.radarTurnRate);
+                setTurnRadarRightRadians(turnDecision.radarTurnRate);
+
+                paint(getGraphics());
+
+            } catch (Exception e) {
+                if (Log.isErrorEnabled()) {
+                    Log.printStackTrace(e);
+                }
             }
-            final TurnDecision turnDecision = strategySelector.selectStrategy(model).getTurnDecision(model);
-            move(turnDecision);
-            handleGun(turnDecision);
-            setTurnRadarRight(turnDecision.radarTurnRate);
-
-            setTurnRadarRightRadians(turnDecision.radarTurnRate);
-
-            paint(getGraphics());
             execute();
         }
     }
@@ -106,8 +116,11 @@ public class ConceptA extends TeamRobot {
                 addEvent(res, e, getName());
             } else if (e instanceof HitByBulletEvent) {
                 addEvent(res, e, ((HitByBulletEvent) e).getName());
+                context.getBulletsService().onHitByBullet((HitByBulletEvent) e);
             } else if (e instanceof BulletHitEvent) {
                 addEvent(res, e, ((BulletHitEvent) e).getName());
+            } else if (e instanceof BulletHitBulletEvent) {
+                context.getBulletsService().onBulletHitBullet((BulletHitBulletEvent) e);
             }
         }
         addEvent(res, statusEvent, getName());
@@ -134,17 +147,8 @@ public class ConceptA extends TeamRobot {
     @Override
     public void onStatus(StatusEvent e) {
         if (BattleConstants.myName == null) {
-            BattleConstants.myName = getName();
-            BattleConstants.initialGunHeat = getGunHeat();
-            BattleConstants.gunCoolingRate = getGunCoolingRate();
-            BattleConstants.setRobotBounds(getWidth(), getHeight());
-            BattleConstants.totalEnemies = getOthers();
-            BattleConstants.teammates = getTeammates() != null ? getTeammates().length : 0;
-            BattleConstants.teammatesNames = getTeammates();
-            final Matcher matcher = Pattern.compile(".*\\((\\d*)\\)").matcher(getName());
-            if (matcher.find()) {
-                BattleConstants.myIndex = new Integer(matcher.group(1));
-            }
+            printControls();
+            initBattleConstants();
         }
 
         currentTime = getTime();
@@ -156,6 +160,32 @@ public class ConceptA extends TeamRobot {
 
         model = newState;
         Config.isPaintEnabled = false;
+    }
+
+    private void initBattleConstants() {
+        BattleConstants.myName = getName();
+        BattleConstants.initialGunHeat = getGunHeat();
+        BattleConstants.gunCoolingRate = getGunCoolingRate();
+        BattleConstants.setRobotBounds(getWidth(), getHeight());
+        BattleConstants.totalEnemies = getOthers();
+        BattleConstants.teammates = getTeammates() != null ? getTeammates().length : 0;
+        BattleConstants.teammatesNames = getTeammates();
+        final Matcher matcher = Pattern.compile(".*\\((\\d*)\\)").matcher(getName());
+        if (matcher.find()) {
+            BattleConstants.myIndex = new Integer(matcher.group(1));
+        }
+    }
+
+    private void printControls() {
+        System.out.println("Controls: ");
+        System.out.println(" F1: Random movement");
+        System.out.println(" F2: Waves");
+        System.out.println(" F3: Bullet collisions");
+        System.out.println(" F4: Wave surfing");
+        System.out.println("F11: Decrease log level");
+        System.out.println("F12: Increase log level");
+        System.out.println("  p: Switch all canvases state");
+        System.out.println();
     }
 
     @Override
@@ -179,6 +209,12 @@ public class ConceptA extends TeamRobot {
                 break;
             case KeyEvent.VK_F2:
                 Canvas.WAVES.switchEnabled();
+                break;
+            case KeyEvent.VK_F3:
+                Canvas.BULLET_HITS.switchEnabled();
+                break;
+            case KeyEvent.VK_F4:
+                Canvas.WAVE_SURFING.switchEnabled();
                 break;
             case KeyEvent.VK_F11:
                 Log.decreaseLogLevel();

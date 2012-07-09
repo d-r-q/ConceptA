@@ -25,6 +25,7 @@ public class Wave {
     private final Map<String, IntervalDouble> hitIntervals = new HashMap<String, IntervalDouble>();
 
     public final BattleModel fireTimeState;
+    public final BattleModel aimTimeState;
     public final double speed;
     public final CaRobotState owner;
     public final CaPoint startPos;
@@ -32,6 +33,7 @@ public class Wave {
 
     public Wave(BattleModel fireTimeState, CaRobotState owner, double speed, CaRobot... targets) {
         this.fireTimeState = fireTimeState;
+        this.aimTimeState = fireTimeState.prevState;
         this.speed = speed;
         this.owner = owner;
         this.startPos = owner.getPosition();
@@ -85,5 +87,29 @@ public class Wave {
 
     public boolean hasRemainingTargets() {
         return hitIntervals.size() > 0;
+    }
+
+    public double getAngleToTarget(String targetName) {
+        return startPos.angleTo(fireTimeState.getRobot(targetName).getPosition());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Wave wave = (Wave) o;
+
+        if (launchTime != wave.launchTime) return false;
+        if (owner != null ? !owner.equals(wave.owner) : wave.owner != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = owner != null ? owner.hashCode() : 0;
+        result = 31 * result + (int) (launchTime ^ (launchTime >>> 32));
+        return result;
     }
 }
