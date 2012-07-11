@@ -15,7 +15,8 @@ public enum Canvas {
     MISK(true),
     WAVES(true),
     BULLET_HITS(false),
-    WAVE_SURFING(true);
+    WAVE_SURFING(true),
+    RADAR(true);
 
     private LinkedList<DrawCommand> drawables = new LinkedList<DrawCommand>();
 

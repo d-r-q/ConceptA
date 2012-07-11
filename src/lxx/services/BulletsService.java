@@ -37,7 +37,7 @@ public class BulletsService implements BattleModelListener, WaveCallback {
     @Override
     public void battleModelUpdated(BattleModel newState) {
         for (CaRobot enemy : newState.aliveEnemies) {
-            if (enemy.getFirePower() > 0) {
+            if (enemy.getLastScanTime() == newState.time && enemy.getFirePower() > 0) {
                 final Wave w = wavesService.launchWave(newState.prevState, newState.prevState.getRobot(enemy.getName()), Rules.getBulletSpeed(enemy.getFirePower()), this, newState.me);
                 waves.add(w);
                 for (BulletsServiceListener listener : listeners) {
@@ -124,7 +124,7 @@ public class BulletsService implements BattleModelListener, WaveCallback {
         listeners.add(listener);
     }
 
-    public Wave getClosestWave(String owner, CaPoint pnt, double travelTimeLimit) {
+    public Wave getClosestDuelWave(String owner, CaPoint pnt, double travelTimeLimit) {
         Wave closestWave = null;
         double minTT = Integer.MAX_VALUE;
         for (Wave w : waves) {
@@ -138,6 +138,10 @@ public class BulletsService implements BattleModelListener, WaveCallback {
             final double tt = (dst - w.getTravelledDistance()) / w.speed;
 
             if (tt <= travelTimeLimit) {
+                continue;
+            }
+
+            if (!w.aimTimeState.hasDuelOpponent()) {
                 continue;
             }
 

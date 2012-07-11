@@ -1,6 +1,7 @@
 package lxx.strategy;
 
 import lxx.BattleConstants;
+import lxx.ConceptA;
 import lxx.model.BattleModel;
 import lxx.model.CaRobot;
 import lxx.movement.MovementDecision;
@@ -8,14 +9,17 @@ import lxx.util.CaPoint;
 import lxx.util.Log;
 import robocode.util.Utils;
 
-import static java.lang.Math.random;
-
 /**
  * User: Aleksey Zhidkov
  * Date: 03.07.12
  */
 public class TeamStrategy implements Strategy {
 
+    private final ConceptA me;
+
+    public TeamStrategy(ConceptA me) {
+        this.me = me;
+    }
 
     @Override
     public boolean applicable(BattleModel model) {
@@ -24,6 +28,10 @@ public class TeamStrategy implements Strategy {
 
     @Override
     public TurnDecision getTurnDecision(BattleModel model) {
+        me.setAdjustGunForRobotTurn(true);
+        me.setAdjustRadarForGunTurn(true);
+        me.setAdjustRadarForRobotTurn(true);
+
         final CaRobot bestTarget = selectTarget(model);
         final CaRobot me = model.me;
         final double angleToTarget = me.angleTo(bestTarget);

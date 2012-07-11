@@ -44,6 +44,9 @@ public class MovementDataManager implements BulletsServiceListener, TickListener
     }
 
     private void registerHit(Wave w, Bullet b) {
+        if (!w.aimTimeState.hasDuelOpponent()) {
+            return;
+        }
         SimpleDataSource dataSource = getDataSource(w);
 
         final double aimTimeLatDir = CaUtils.getNonZeroLateralDirection(w.aimTimeState.duelOpponent.getPosition(), w.aimTimeState.me);
@@ -96,6 +99,10 @@ public class MovementDataManager implements BulletsServiceListener, TickListener
                 }
             });
 
+            if (bullets.size() == 0) {
+                bullets.add(new BearingOffsetDanger(0, 1));
+            }
+
             bulletsCache.put(w, bullets);
         }
 
@@ -106,6 +113,9 @@ public class MovementDataManager implements BulletsServiceListener, TickListener
     public void tick() {
         if (Canvas.WAVES.enabled()) {
             for (Wave w : bulletsCache.keySet()) {
+                if (!w.aimTimeState.hasDuelOpponent()) {
+                    return;
+                }
                 final double baseAlpha = w.aimTimeState.duelOpponent.angleTo(w.aimTimeState.me);
                 final List<BearingOffsetDanger> bullets = bulletsCache.get(w);
                 double minDanger = Integer.MAX_VALUE;

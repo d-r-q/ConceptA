@@ -40,7 +40,7 @@ public class CaRobotStateFactory {
         }
 
         return new CaRobotState(BattleConstants.myName, new CaPoint(status.getX(), status.getY()), status.getVelocity(),
-                status.getHeadingRadians(), status.getEnergy(), time, de != null, firePower, status.getGunHeat(),
+                status.getHeadingRadians(), status.getEnergy(), time, time, de != null, firePower, status.getGunHeat(),
                 status.getRadarHeadingRadians(), status.getGunHeadingRadians());
     }
 
@@ -49,18 +49,19 @@ public class CaRobotStateFactory {
         double velocity = prevState.velocity;
         double heading = prevState.heading;
         double energy = prevState.energy;
-        boolean alive = true;
+        boolean alive = prevState.alive;
         double firePower = 0;
         double gunHeat = prevState.gunHeat - BattleConstants.gunCoolingRate;
         double expectedEnergy = energy;
         double takenDamage = 0;
         double givenDamage = 0;
         double hitDamage = 0;
+        ScannedRobotEvent se = null;
         for (Event e : events) {
             if (e instanceof RobotDeathEvent) {
                 alive = false;
             } else if (e instanceof ScannedRobotEvent) {
-                final ScannedRobotEvent se = (ScannedRobotEvent) e;
+                se = (ScannedRobotEvent) e;
                 pos = me.getPosition().project(me.getHeading() + se.getBearingRadians(), se.getDistance());
                 velocity = se.getVelocity();
                 heading = se.getHeadingRadians();
@@ -86,10 +87,12 @@ public class CaRobotStateFactory {
             firePower = expectedEnergy - energy;
             gunHeat = Rules.getGunHeat(firePower);
         } else {
-            gunHeat = max(0, prevState.gunHeat - BattleConstants.gunCoolingRate);
+            gunHeat = max(0, prevState.gunHeat - BattleConstants.gunCoolingRate * (events.get(0).getTime() - prevState.getTime()));
         }
 
-        return new CaRobotState(prevState.getName(), pos, velocity, heading, energy, events.get(0).getTime(), alive, firePower, gunHeat);
+        return new CaRobotState(prevState.getName(), pos, velocity, heading, energy,
+                se != null ? se.getTime() : prevState.getLastScanTime(), events.get(0).getTime(),
+                alive, firePower, gunHeat);
     }
 
     private static boolean isHitWall(CaRobot prevState, CaPoint curPos, double curVelocity, double curHeading) {
@@ -111,8 +114,8 @@ public class CaRobotStateFactory {
         final double newVelocity = getNewVelocity(robot.getVelocity(), md.desiredVelocity);
         final CaPoint newPos = robot.getPosition().project(newHeading, newVelocity);
 
-        return new CaRobotState(robot.getName(), newPos, newVelocity, newHeading, robot.getEnergy(), robot.getTime() + 1,
-                robot.isAlive(), robot.firePower, max(0, robot.getGunHeat() - BattleConstants.gunCoolingRate),
+        return new CaRobotState(robot.getName(), newPos, newVelocity, newHeading, robot.getEnergy(), robot.getLastScanTime() + 1,
+                robot.getTime() + 1, robot.isAlive(), robot.firePower, max(0, robot.getGunHeat() - BattleConstants.gunCoolingRate),
                 null, null);
     }
 

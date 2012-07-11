@@ -1,16 +1,20 @@
 package lxx.strategy;
 
+import lxx.BattleConstants;
+import lxx.ConceptA;
 import lxx.model.BattleField;
 import lxx.model.BattleModel;
 import lxx.model.CaRobot;
 import lxx.movement.MovementDecision;
-import lxx.util.CaConstants;
+import lxx.radar.MeleeRadar;
 import lxx.util.CaPoint;
 import lxx.util.CaUtils;
 import robocode.Rules;
 import robocode.util.Utils;
 
+import static java.lang.Math.min;
 import static java.lang.Math.random;
+import static java.lang.Math.signum;
 
 /**
  * User: Aleksey Zhidkov
@@ -18,7 +22,15 @@ import static java.lang.Math.random;
  */
 public class MeleeStrategy implements Strategy {
 
+    private final MeleeRadar radar = new MeleeRadar();
+
+    private final ConceptA robot;
+
     private CaPoint destination;
+
+    public MeleeStrategy(ConceptA robot) {
+        this.robot = robot;
+    }
 
     @Override
     public boolean applicable(BattleModel model) {
@@ -27,21 +39,45 @@ public class MeleeStrategy implements Strategy {
 
     @Override
     public TurnDecision getTurnDecision(BattleModel model) {
+        robot.setAdjustGunForRobotTurn(true);
+        robot.setAdjustRadarForGunTurn(true);
+        robot.setAdjustRadarForRobotTurn(true);
+
         final CaRobot me = model.me;
-        if (destination == null || me.getPosition().distance(destination) < 8) {
+        if (destination == null || me.getPosition().distance(destination) < 8 || getMinDistance(model) < 100) {
             selectDestination(model);
         }
 
         final MovementDecision md = MovementDecision.getMovementDecision(me, destination);
 
+        final double radarTurnRate = radar.getRadarTurnRate(model);
 
-        return new TurnDecision(md.desiredVelocity, md.turnRate, Utils.normalRelativeAngle(getFireAngle(model) - me.getGunHeading()), 3, Double.POSITIVE_INFINITY);
+        final double gunTurnRate;
+        if (model.me.getGunHeat() / BattleConstants.gunCoolingRate > 10) {
+            robot.setAdjustRadarForGunTurn(false);
+            robot.setAdjustRadarForRobotTurn(false);
+            gunTurnRate = Rules.GUN_TURN_RATE_RADIANS * signum(radarTurnRate);
+        } else {
+            gunTurnRate = Utils.normalRelativeAngle(getFireAngle(model) - me.getGunHeading());
+        }
+
+        return new TurnDecision(md.desiredVelocity, md.turnRate, gunTurnRate, 3, radarTurnRate);
+    }
+
+    private double getMinDistance(BattleModel model) {
+        double minDistance = Integer.MAX_VALUE;
+
+        for (CaRobot enemy : model.aliveEnemies) {
+            minDistance = min(minDistance, model.me.getPosition().distance(enemy.getPosition()));
+        }
+
+        return minDistance;
     }
 
     private double getFireAngle(BattleModel model) {
         CaRobot bestEnemy = null;
         double bestEnemyScore = 0;
-        for (CaRobot enemy : model.enemies.values()) {
+        for (CaRobot enemy : model.aliveEnemies) {
             final double enemyScore = getEnemyScore(enemy, model);
             if (bestEnemy == null || enemyScore > bestEnemyScore) {
                 bestEnemy = enemy;
@@ -55,11 +91,11 @@ public class MeleeStrategy implements Strategy {
     private double getEnemyScore(CaRobot enemy, BattleModel model) {
         double score = 0;
         final double angleToEnemy = model.me.angleTo(enemy);
-        for (CaRobot anotherEnemy : model.enemies.values()) {
+        for (CaRobot anotherEnemy : model.aliveEnemies) {
             if (enemy.equals(anotherEnemy)) {
                 continue;
             }
-            score += enemy.getEnergy() / CaUtils.anglesDiff(angleToEnemy, model.me.angleTo(anotherEnemy));
+            score += CaUtils.anglesDiff(angleToEnemy, model.me.angleTo(anotherEnemy)) / model.me.getPosition().distance(enemy.getPosition()) / (enemy.getEnergy() + 1);
         }
 
         return score;
@@ -87,7 +123,7 @@ public class MeleeStrategy implements Strategy {
 
     private double getDanger(CaPoint cnd, BattleModel model) {
         double dng = 0;
-        for (CaRobot enemy : model.enemies.values()) {
+        for (CaRobot enemy : model.aliveEnemies) {
             dng += enemy.getEnergy() / enemy.getPosition().distance(cnd);
         }
         return dng;

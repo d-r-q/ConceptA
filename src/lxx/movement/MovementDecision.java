@@ -26,10 +26,14 @@ public class MovementDecision {
         final double desiredVelocity;
         final double turnRate;
         if (CaUtils.anglesDiff(robot.getHeading(), desiredDirection) < CaConstants.RADIANS_90) {
-            desiredVelocity = Rules.MAX_VELOCITY;
+            desiredVelocity = robot.getPosition().distance(destination) > CaUtils.getStopDistance(robot.getSpeed())
+                    ? Rules.MAX_VELOCITY
+                    : 0;
             turnRate = Utils.normalRelativeAngle(desiredDirection - robot.getHeading());
         } else {
-            desiredVelocity = -Rules.MAX_VELOCITY;
+            desiredVelocity = robot.getPosition().distance(destination) > CaUtils.getStopDistance(robot.getSpeed())
+                    ? -Rules.MAX_VELOCITY
+                    : 0;
             turnRate = Utils.normalRelativeAngle(desiredDirection - Utils.normalAbsoluteAngle(robot.getHeading() + CaConstants.RADIANS_180));
         }
 

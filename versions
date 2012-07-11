@@ -1,3 +1,14 @@
+v. 0.8
+* Some issues with switching from melee to duel strategy fixed
+* Added danger to zero bearing offset, when no real data
+* Fire angle selection in gun improved
+* Gun heat tracking in melee improved
+* Melee movement mechanics improved
+* Discard melee waves in WaveSurfing
+* Better melee radar
+* Energy drops tracking in melee improved
+* Select target with lesser energy in melee instead of target with greater energy
+
 v. 0.7
 * Simple true single wave surfing implemented
 * Fire at zero bearing offset, when enemy's energy is 0

@@ -1,6 +1,5 @@
 package lxx.model;
 
-import lxx.BattleConstants;
 import lxx.util.CaConstants;
 import lxx.util.CaUtils;
 import lxx.util.Log;
@@ -21,16 +20,18 @@ public class CaRobot extends CaRobotState {
     private final double movementDirection;
 
     public CaRobot(CaRobotState currentState) {
-        super(currentState.name, currentState.position, currentState.velocity, currentState.heading, currentState.energy, currentState.time,
-                currentState.alive, currentState.firePower, currentState.gunHeat, currentState.radarHeading, currentState.gunHeading);
+        super(currentState.name, currentState.position, currentState.velocity, currentState.heading, currentState.energy,
+                currentState.lastScanTime, currentState.time, currentState.alive, currentState.firePower, currentState.gunHeat,
+                currentState.radarHeading, currentState.gunHeading);
 
         acceleration = 0;
         movementDirection = currentState.heading;
     }
 
     public CaRobot(CaRobot prevState, CaRobotState currentState) {
-        super(currentState.name, currentState.position, currentState.velocity, currentState.heading, currentState.energy, currentState.time,
-                currentState.alive, currentState.firePower, currentState.gunHeat, currentState.radarHeading, currentState.gunHeading);
+        super(currentState.name, currentState.position, currentState.velocity, currentState.heading, currentState.energy,
+                currentState.lastScanTime, currentState.time, currentState.alive, currentState.firePower, currentState.gunHeat,
+                currentState.radarHeading, currentState.gunHeading);
 
         acceleration = calculateAcceleration(prevState, currentState);
         if (currentState.speed == 0) {
@@ -63,7 +64,7 @@ public class CaRobot extends CaRobotState {
         }
 
         if (acceleration < -Rules.DECELERATION || acceleration > Rules.ACCELERATION) {
-            if (prevState.time + 1 == curState.time && Log.isWarnEnabled()) {
+            if (prevState.lastScanTime + 1 == curState.lastScanTime && Log.isWarnEnabled()) {
                 // todo: add check for wall hits
                 Log.warn(curState.getName() + "'s acceleration is " + acceleration);
             }

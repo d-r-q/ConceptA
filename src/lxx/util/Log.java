@@ -38,8 +38,16 @@ public class Log {
         return logLevel >= ERROR_LEVEL;
     }
 
+    public static boolean isDebugEnabled() {
+        return logLevel >= DEBUG_LEVEL;
+    }
+
     public static void warn(String msg) {
         System.out.println("[WARN][" + ConceptA.currentRound + ":" + ConceptA.currentTime + "]: " + msg);
+    }
+
+    public static void debug(String msg) {
+        System.out.println("[DEBUG][" + ConceptA.currentRound + ":" + ConceptA.currentTime + "]: " + msg);
     }
 
     public static void printStackTrace(Exception e) {

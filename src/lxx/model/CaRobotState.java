@@ -1,6 +1,9 @@
 package lxx.model;
 
 import lxx.util.CaPoint;
+import robocode.Event;
+
+import java.util.List;
 
 import static java.lang.Math.abs;
 
@@ -15,6 +18,7 @@ public class CaRobotState {
     protected final double velocity;
     protected final double heading;
     protected final double energy;
+    protected final long lastScanTime;
     protected final long time;
     protected final Double radarHeading;
     protected final Double gunHeading;
@@ -24,13 +28,14 @@ public class CaRobotState {
 
     protected final double speed;
 
-    public CaRobotState(String name, CaPoint position, double velocity, double heading, double energy, long time, boolean alive,
-                        double firePower, double gunHeat, Double radarHeading, Double gunHeading) {
+    public CaRobotState(String name, CaPoint position, double velocity, double heading, double energy, long lastScanTime,
+                        long time, boolean alive, double firePower, double gunHeat, Double radarHeading, Double gunHeading) {
         this.name = name;
         this.position = position;
         this.velocity = velocity;
         this.heading = heading;
         this.energy = energy;
+        this.lastScanTime = lastScanTime;
         this.time = time;
         this.radarHeading = radarHeading;
         this.gunHeading = gunHeading;
@@ -41,10 +46,10 @@ public class CaRobotState {
         this.speed = abs(velocity);
     }
 
-    public CaRobotState(String name, CaPoint position, double velocity, double heading, double energy, long time, boolean alive,
-                        double firePower, double gunHeat) {
+    public CaRobotState(String name, CaPoint position, double velocity, double heading, double energy, long lastScanTime,
+                        long time, boolean alive, double firePower, double gunHeat) {
         // nulls for fast detecting of using object, which represents an enemy instead of ConceptA
-        this(name, position, velocity, heading, energy, time, alive, firePower, gunHeat, null, null);
+        this(name, position, velocity, heading, energy, lastScanTime, time, alive, firePower, gunHeat, null, null);
     }
 
     public String getName() {
@@ -67,8 +72,8 @@ public class CaRobotState {
         return energy;
     }
 
-    public long getTime() {
-        return time;
+    public long getLastScanTime() {
+        return lastScanTime;
     }
 
     public double angleTo(CaRobot caRobot) {
@@ -110,7 +115,7 @@ public class CaRobotState {
 
         CaRobotState that = (CaRobotState) o;
 
-        if (time != that.time) return false;
+        if (lastScanTime != that.lastScanTime) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
 
         return true;
@@ -119,11 +124,15 @@ public class CaRobotState {
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (int) (time ^ (time >>> 32));
+        result = 31 * result + (int) (lastScanTime ^ (lastScanTime >>> 32));
         return result;
     }
 
     public boolean isAlive() {
         return alive;
+    }
+
+    public long getTime() {
+        return time;
     }
 }

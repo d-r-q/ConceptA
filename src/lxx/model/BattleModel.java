@@ -2,12 +2,8 @@ package lxx.model;
 
 import lxx.BattleConstants;
 import lxx.ConceptA;
-import lxx.events.WavePassedEvent;
-import lxx.services.WavesService;
 import lxx.util.CaPoint;
 import robocode.Event;
-import robocode.RobotDeathEvent;
-import robocode.ScannedRobotEvent;
 
 import java.util.*;
 
@@ -19,8 +15,8 @@ public class BattleModel {
 
     public final BattleModel prevState;
 
-    public final Map<String, CaRobot> enemies;
-    public final Map<String, CaRobot> teammates;
+    private final Map<String, CaRobot> enemies;
+    private final Map<String, CaRobot> teammates;
 
     public final CaRobot me;
     public final CaRobot duelOpponent;
@@ -67,7 +63,7 @@ public class BattleModel {
         for (Map.Entry<String, List<Event>> e : events.entrySet()) {
             CaRobot robot = enemies.get(e.getKey());
             final CaRobotState enemyNextState = CaRobotStateFactory.getAnotherRobotState(me, robot != null ? robot
-                    : new CaRobot(new CaRobotState(e.getKey(), new CaPoint(), 0, 0, 0, 0, false, 0, BattleConstants.initialGunHeat - BattleConstants.gunCoolingRate * ConceptA.currentTime)), e.getValue());
+                    : new CaRobot(new CaRobotState(e.getKey(), new CaPoint(), 0, 0, 0, 0, 0, true, 0, BattleConstants.initialGunHeat - BattleConstants.gunCoolingRate * ConceptA.currentTime)), e.getValue());
             robot = (robot == null)
                     ? new CaRobot(enemyNextState)
                     : new CaRobot(robot, enemyNextState);
@@ -125,5 +121,9 @@ public class BattleModel {
         final LinkedList<CaRobot> teamRobots = new LinkedList<CaRobot>(aliveTeammates);
         teamRobots.add(me);
         return teamRobots;
+    }
+
+    public int getScannedEnemiesCount() {
+        return enemies.size();
     }
 }

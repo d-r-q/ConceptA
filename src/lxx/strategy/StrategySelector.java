@@ -1,8 +1,6 @@
 package lxx.strategy;
 
 import lxx.ConceptA;
-import lxx.data.GuessFactor;
-import lxx.data.MovementDataManager;
 import lxx.gun.GuessFactorGun;
 import lxx.model.BattleModel;
 import lxx.services.Context;
@@ -24,8 +22,8 @@ public class StrategySelector {
         final GuessFactorGun gun = new GuessFactorGun(context.getWavesService());
         me.addBattleModelListener(gun);
         strategies.add(new DuelStrategy(me, context, gun));
-        strategies.add(new TeamStrategy());
-        strategies.add(new MeleeStrategy());
+        strategies.add(new TeamStrategy(me));
+        strategies.add(new MeleeStrategy(me));
     }
 
     public Strategy selectStrategy(BattleModel model) {

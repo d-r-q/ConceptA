@@ -83,4 +83,13 @@ public class CaUtils {
         return velocity * Math.sin(Utils.normalRelativeAngle(heading - center.angleTo(pos)));
     }
 
+    public static double getStopDistance(double speed) {
+        double distance = 0;
+        while (speed > 0) {
+            speed -= Rules.DECELERATION;
+            distance += speed;
+        }
+        return distance;
+    }
+
 }

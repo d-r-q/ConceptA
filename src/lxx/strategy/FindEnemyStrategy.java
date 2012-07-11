@@ -19,7 +19,7 @@ public class FindEnemyStrategy implements Strategy {
 
     @Override
     public boolean applicable(BattleModel model) {
-        return model.enemies.size() < BattleConstants.totalEnemies && ConceptA.currentTime < 5;
+        return model.getScannedEnemiesCount() < BattleConstants.totalEnemies && ConceptA.currentTime < 5;
     }
 
     @Override

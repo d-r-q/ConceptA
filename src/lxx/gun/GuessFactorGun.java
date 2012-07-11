@@ -14,9 +14,7 @@ import lxx.util.CaUtils;
 import lxx.util.IntervalDouble;
 import robocode.Rules;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: Aleksey Zhidkov
@@ -41,12 +39,28 @@ public class GuessFactorGun implements BattleModelListener, WaveCallback {
         if (entries.size() == 0) {
             return 0;
         }
-        double totalBOs = 0;
+        final List<Double> bos = new ArrayList<Double>();
         for (KdTree.Entry<Double> e : entries) {
-            totalBOs += e.value * CaUtils.getMaxEscapeAngle(bulletSpeed) * CaUtils.getNonZeroLateralDirection(battleModel.me.getPosition(), battleModel.duelOpponent);
+            bos.add(e.value * CaUtils.getMaxEscapeAngle(bulletSpeed) * CaUtils.getNonZeroLateralDirection(battleModel.me.getPosition(), battleModel.duelOpponent));
         }
 
-        return totalBOs / entries.size();
+        double bestBo = 0;
+        double bestBoDist = Integer.MAX_VALUE;
+
+        for (Double bo1 : bos) {
+            double totalDist = 0;
+            for (Double bo2 : bos) {
+                double diff = bo1 - bo2;
+                totalDist += diff * diff;
+            }
+
+            if (totalDist < bestBoDist) {
+                bestBo = bo1;
+                bestBoDist = totalDist;
+            }
+        }
+
+        return bestBo;
     }
 
     @Override

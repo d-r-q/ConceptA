@@ -48,7 +48,7 @@ public class WaveSurfingMovement {
     }
 
     public MovementDecision getMovementDecision(BattleModel model) {
-        final Wave closestWave = bulletsService.getClosestWave(model.duelOpponent.getName(), model.me.getPosition(), MIN_WAVE_TRAVEL_TIME);
+        final Wave closestWave = bulletsService.getClosestDuelWave(model.duelOpponent.getName(), model.me.getPosition(), MIN_WAVE_TRAVEL_TIME);
         lastOrbitDirection = selectOrbitDirection(model, closestWave);
         final CaPoint orbitCenter;
         if (model.hasDuelOpponent()) {
@@ -126,7 +126,7 @@ public class WaveSurfingMovement {
     }
 
     public boolean applicable(BattleModel model) {
-        return bulletsService.getClosestWave(model.duelOpponent.getName(), model.me.getPosition(), MIN_WAVE_TRAVEL_TIME) != null;
+        return bulletsService.getClosestDuelWave(model.duelOpponent.getName(), model.me.getPosition(), MIN_WAVE_TRAVEL_TIME) != null;
     }
 
     private class Prediction {

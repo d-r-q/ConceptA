@@ -182,6 +182,7 @@ public class ConceptA extends TeamRobot {
         System.out.println(" F2: Waves");
         System.out.println(" F3: Bullet collisions");
         System.out.println(" F4: Wave surfing");
+        System.out.println(" F5: Radar");
         System.out.println("F11: Decrease log level");
         System.out.println("F12: Increase log level");
         System.out.println("  p: Switch all canvases state");
@@ -215,6 +216,9 @@ public class ConceptA extends TeamRobot {
                 break;
             case KeyEvent.VK_F4:
                 Canvas.WAVE_SURFING.switchEnabled();
+                break;
+            case KeyEvent.VK_F5:
+                Canvas.RADAR.switchEnabled();
                 break;
             case KeyEvent.VK_F11:
                 Log.decreaseLogLevel();
